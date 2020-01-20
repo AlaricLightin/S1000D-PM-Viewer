@@ -1,0 +1,10 @@
+spring:
+  liquibase:
+    drop-first: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  datasource:
+    url: jdbc:postgresql:publications-test
+    username: springuser
+    password: 123
+    driver-class-name: org.postgresql.Driver

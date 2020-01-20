@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1-0-h2
+      author: alexander_biderman
+      changes:
+        - sqlFile:
+            path: h2-replacing-for-xml-tables.sql
+            relativeToChangelogFile: true
+
+        - sqlFile:
+            path: no-xml-tables.sql
+            relativeToChangelogFile: true

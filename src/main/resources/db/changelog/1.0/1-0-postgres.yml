@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1-0-postgres
+      author: alexander_biderman
+      changes:
+        - sqlFile:
+            path: xml-tables.sql
+            relativeToChangelogFile: true
+
+        - sqlFile:
+            path: no-xml-tables.sql
+            relativeToChangelogFile: true

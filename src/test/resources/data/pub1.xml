@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--suppress ALL -->
+<pm xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://www.s1000d.org/S1000D_4-1/xml_schema_flat/pm.xsd">
+    <identAndStatusSection>
+        <pmAddress>
+            <pmIdent>
+                <pmCode modelIdentCode="AA" pmIssuer="00001" pmNumber="00001" pmVolume="00"></pmCode>
+                <language languageIsoCode="ru" countryIsoCode="RU"></language>
+                <issueInfo issueNumber="001" inWork="00"></issueInfo>
+            </pmIdent>
+            <pmAddressItems>
+                <issueDate year="2020" month="01" day="10"></issueDate>
+                <pmTitle>Тестовая публикация</pmTitle>
+            </pmAddressItems>
+        </pmAddress>
+        <pmStatus>
+            <security securityClassification="01"></security>
+            <responsiblePartnerCompany enterpriseCode="00000">
+                <enterpriseName>Вымышленная компания-разработчик</enterpriseName>
+            </responsiblePartnerCompany>
+            <applic>
+                <displayText>
+                    <simplePara>Все</simplePara>
+                </displayText>
+            </applic>
+            <brexDmRef>
+                <dmRef>
+                    <dmRefIdent>
+                        <dmCode modelIdentCode="TEST1" systemDiffCode="A" systemCode="00" subSystemCode="0" subSubSystemCode="0" assyCode="00" disassyCode="00" disassyCodeVariant="A" infoCode="022" infoCodeVariant="A" itemLocationCode="D"></dmCode>                
+                    </dmRefIdent>
+                </dmRef>
+            </brexDmRef>
+            <qualityAssurance>
+                <unverified></unverified>
+            </qualityAssurance>
+        </pmStatus>
+    </identAndStatusSection>
+    <content>
+        <pmEntry>
+            <dmRef>
+                <dmRefIdent>
+                    <dmCode modelIdentCode="TEST1" systemDiffCode="A" systemCode="111" subSystemCode="1" subSubSystemCode="1" assyCode="11" disassyCode="11" disassyCodeVariant="A" infoCode="110" infoCodeVariant="A" itemLocationCode="A"></dmCode>
+                    <issueInfo issueNumber="001" inWork="00"></issueInfo>
+                    <language languageIsoCode="ru" countryIsoCode="RU"></language>
+                </dmRefIdent>
+                <dmRefAddressItems>
+                    <dmTitle>
+                        <techName>Документ</techName>
+                    </dmTitle>
+                </dmRefAddressItems>
+            </dmRef>
+        </pmEntry>
+    </content>
+</pm>
