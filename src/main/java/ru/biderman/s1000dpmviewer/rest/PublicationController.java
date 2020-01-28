@@ -28,11 +28,12 @@ public class PublicationController {
         return detailsService.findAll();
     }
 
-    @PostMapping(value = "/publication", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadPublication(@RequestParam MultipartFile file, UriComponentsBuilder builder) throws IOException {
+    @PostMapping(value = "/publication", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PublicationDetails> uploadPublication(@RequestPart("file") MultipartFile file,
+                                                                UriComponentsBuilder builder) throws IOException {
         Publication publication = publicationService.add(file.getInputStream());
         UriComponents uriComponents = builder.path("/publication/{id}").buildAndExpand(publication.getId());
-        return ResponseEntity.created(uriComponents.toUri()).build();
+        return ResponseEntity.created(uriComponents.toUri()).body(publication.getDetails());
     }
 
     @DeleteMapping("/publication/{id}")
@@ -42,7 +43,7 @@ public class PublicationController {
 
     @ExceptionHandler(PublicationNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public void bookNotFoundHandler() {
+    public void publicationNotFoundHandler() {
 
     }
 }

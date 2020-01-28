@@ -16,3 +16,8 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+
+  servlet:
+    multipart:
+      enabled: true
+      location: ${java.io.tmpdir}

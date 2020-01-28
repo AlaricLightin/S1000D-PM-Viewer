@@ -1,29 +1,26 @@
 <template>
   <v-app>
     <v-content>
-      <p>{{publications}}</p>
+      <v-container>
+        <Publications/>
+        <PublicationAdd/>
+      </v-container>
     </v-content>
   </v-app>
 </template>
 
 <script>
-  import {mapState} from 'vuex';
+  // TODO написать просмотр
+  import Publications from "./components/Publications";
+  import PublicationAdd from "./components/PublicationAdd";
 
   export default {
     name: 'App',
 
-    components: {},
+    components: {PublicationAdd, Publications},
 
     data: () => ({
       //
     }),
-
-    computed: mapState({
-      publications: state => state.publications.all
-    }),
-
-    mounted() {
-      this.$store.dispatch('publications/load');
-    }
   };
 </script>

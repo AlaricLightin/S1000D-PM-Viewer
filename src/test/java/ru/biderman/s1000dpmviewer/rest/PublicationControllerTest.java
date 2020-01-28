@@ -78,8 +78,10 @@ class PublicationControllerTest {
         InputStream contentStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
         MockMultipartFile multipartFile = new MockMultipartFile("file", contentStream);
 
+        PublicationDetails details = createTestDetails(PUB_ID, PUB_CODE);
         Publication result = mock(Publication.class);
         when(result.getId()).thenReturn(PUB_ID);
+        when(result.getDetails()).thenReturn(details);
         when(publicationService.add(any())).thenReturn(result);
 
         mockMvc.perform(multipart("/publication").file(multipartFile))
@@ -92,6 +94,8 @@ class PublicationControllerTest {
                                 .buildAndExpand(PUB_ID)
                                 .toUriString()
                 ))
+                .andExpect(jsonPath("$.id").value(PUB_ID))
+                .andExpect(jsonPath("$.code").value(PUB_CODE))
                 .andReturn();
 
         ArgumentCaptor<InputStream> argumentCaptor = ArgumentCaptor.forClass(InputStream.class);
