@@ -13,7 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.biderman.s1000dpmviewer.domain.Publication;
 import ru.biderman.s1000dpmviewer.domain.PublicationDetails;
+import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
 import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
+import ru.biderman.s1000dpmviewer.rest.dto.ContentItem;
 import ru.biderman.s1000dpmviewer.services.PublicationDetailsService;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
 
@@ -21,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -40,6 +43,9 @@ class PublicationControllerTest {
 
     @MockBean
     PublicationService publicationService;
+
+    @MockBean
+    ContentDtoService contentDtoService;
 
     private static final String PUB_CODE = "CODE";
     private static final long PUB_ID = 101;
@@ -122,4 +128,20 @@ class PublicationControllerTest {
                 .andReturn();
     }
 
+    @DisplayName("должен возвращать контент")
+    @Test
+    void shouldGetContent() throws Exception {
+        String entryTitle = "Entry title";
+        Entry entry = mock(Entry.class);
+        when(publicationService.getContentById(PUB_ID)).thenReturn(entry);
+        ContentItem contentItem = new ContentItem(entryTitle, Collections.emptyList());
+        when(contentDtoService.createContentItems(entry)).thenReturn(Collections.singletonList(contentItem));
+
+        mockMvc.perform(get("/publication/{id}/content", PUB_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name").value(entryTitle))
+                .andReturn();
+    }
 }

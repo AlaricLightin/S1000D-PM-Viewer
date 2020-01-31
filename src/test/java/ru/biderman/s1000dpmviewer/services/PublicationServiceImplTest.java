@@ -5,7 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.w3c.dom.Document;
 import ru.biderman.s1000dpmviewer.domain.Publication;
+import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
 import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
 import ru.biderman.s1000dpmviewer.repositories.PublicationRepository;
 import ru.biderman.s1000dpmviewer.xmlparsers.PublicationParser;
@@ -75,5 +77,25 @@ class PublicationServiceImplTest {
     void shouldThrowExceptionIfDeletingAbsent() {
         when(publicationRepository.existsById(PUBLICATION_ID)).thenReturn(false);
         assertThrows(PublicationNotFoundException.class, () -> publicationService.deleteById(PUBLICATION_ID));
+    }
+
+    @DisplayName("должен возвращать содержимое публикации")
+    @Test
+    void shouldGetContent() throws PublicationNotFoundException{
+        Publication publication = mock(Publication.class);
+        Document document = mock(Document.class);
+        Entry entry = mock(Entry.class);
+        when(publication.getDocument()).thenReturn(document);
+        when(publicationParser.getPublicationContent(document)).thenReturn(entry);
+        when(publicationRepository.findById(PUBLICATION_ID)).thenReturn(Optional.of(publication));
+
+        assertThat(publicationService.getContentById(PUBLICATION_ID)).isEqualTo(entry);
+    }
+
+    @DisplayName("должен бросать исключение, если требуется контент отсутствующей публикации")
+    @Test
+    void shouldThrowExceptionIfContentAbsent() {
+        when(publicationRepository.findById(PUBLICATION_ID)).thenReturn(Optional.empty());
+        assertThrows(PublicationNotFoundException.class, () -> publicationService.getContentById(PUBLICATION_ID));
     }
 }

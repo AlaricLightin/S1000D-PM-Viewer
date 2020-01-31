@@ -10,7 +10,9 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.biderman.s1000dpmviewer.domain.Publication;
 import ru.biderman.s1000dpmviewer.domain.PublicationDetails;
+import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
 import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
+import ru.biderman.s1000dpmviewer.rest.dto.ContentItem;
 import ru.biderman.s1000dpmviewer.services.PublicationDetailsService;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
 
@@ -22,6 +24,7 @@ import java.util.List;
 public class PublicationController {
     private final PublicationService publicationService;
     private final PublicationDetailsService detailsService;
+    private final ContentDtoService contentDtoService;
 
     @GetMapping("/publication")
     public List<PublicationDetails> getAllDetails() {
@@ -39,6 +42,12 @@ public class PublicationController {
     @DeleteMapping("/publication/{id}")
     public void deletePublication(@PathVariable("id") long id) throws PublicationNotFoundException {
         publicationService.deleteById(id);
+    }
+
+    @GetMapping("/publication/{id}/content")
+    public List<ContentItem> getContent(@PathVariable("id") long id) throws PublicationNotFoundException {
+        Entry rootEntry = publicationService.getContentById(id);
+        return contentDtoService.createContentItems(rootEntry);
     }
 
     @ExceptionHandler(PublicationNotFoundException.class)

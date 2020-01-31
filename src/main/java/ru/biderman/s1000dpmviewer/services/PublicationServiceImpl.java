@@ -3,6 +3,7 @@ package ru.biderman.s1000dpmviewer.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.biderman.s1000dpmviewer.domain.Publication;
+import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
 import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
 import ru.biderman.s1000dpmviewer.repositories.PublicationRepository;
 import ru.biderman.s1000dpmviewer.xmlparsers.PublicationParser;
@@ -35,6 +36,14 @@ public class PublicationServiceImpl implements PublicationService {
     @Override
     public Publication findById(long id) throws PublicationNotFoundException{
         return publicationRepository.findById(id)
+                .orElseThrow(PublicationNotFoundException::new);
+    }
+
+    @Override
+    public Entry getContentById(long id) throws PublicationNotFoundException {
+        return publicationRepository.findById(id)
+                .map(publication -> parser.getPublicationContent(
+                        publication.getDocument()))
                 .orElseThrow(PublicationNotFoundException::new);
     }
 }

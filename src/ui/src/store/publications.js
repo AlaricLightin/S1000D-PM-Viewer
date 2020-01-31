@@ -29,8 +29,8 @@ const actions = {
         return axios
             .get('/publication')
             .then(r => r.data)
-            .then(books => {
-                commit('SET_PUBLICATIONS', books)
+            .then(publications => {
+                commit('SET_PUBLICATIONS', publications)
             })
     },
 
@@ -56,7 +56,7 @@ const actions = {
                 const idx = getters.getIdx(id);
                 commit('DELETE_PUBLICATION', idx);
             });
-    }
+    },
 };
 
 export default {

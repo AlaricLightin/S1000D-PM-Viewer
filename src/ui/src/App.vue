@@ -2,22 +2,17 @@
   <v-app>
     <v-content>
       <v-container>
-        <Publications/>
-        <PublicationAdd/>
+        <router-view/>
       </v-container>
     </v-content>
   </v-app>
 </template>
 
 <script>
-  // TODO написать просмотр
-  import Publications from "./components/Publications";
-  import PublicationAdd from "./components/PublicationAdd";
+  // TODO написать навигацию
 
   export default {
     name: 'App',
-
-    components: {PublicationAdd, Publications},
 
     data: () => ({
       //

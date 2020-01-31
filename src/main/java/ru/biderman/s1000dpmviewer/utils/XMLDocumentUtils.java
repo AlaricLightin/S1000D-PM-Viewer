@@ -43,6 +43,8 @@ public class XMLDocumentUtils {
     }
 
     public static Document getDocumentFromString(String s) {
+        if (s == null)
+            return null;
         InputStream stream = new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8));
         return getDocumentFromStream(stream);
     }

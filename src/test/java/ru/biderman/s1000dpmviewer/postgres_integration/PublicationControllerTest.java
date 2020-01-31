@@ -10,11 +10,18 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.biderman.s1000dpmviewer.domain.PublicationDetails;
+import ru.biderman.s1000dpmviewer.services.PublicationDetailsService;
+import ru.biderman.s1000dpmviewer.services.PublicationService;
 import ru.biderman.s1000dpmviewer.utils.TestConsts;
 import ru.biderman.s1000dpmviewer.utils.TestUtils;
 
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -28,8 +35,16 @@ import static ru.biderman.s1000dpmviewer.utils.TestConsts.*;
 @ActiveProfiles("postgres-test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class PublicationControllerTest {
+    private static final long START_ID = 100;
+
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    PublicationDetailsService detailsService;
+
+    @Autowired
+    PublicationService publicationService;
 
     @DisplayName("должен добавлять публикацию из файла")
     @Test
@@ -43,13 +58,54 @@ public class PublicationControllerTest {
                     .andReturn();
         }
 
+        Optional<PublicationDetails> details = detailsService.findById(START_ID);
+        assertThat(details)
+                .isPresent();
+
+        assertThat(details.get())
+                .hasFieldOrPropertyWithValue("id", START_ID)
+                .hasFieldOrPropertyWithValue("code", TEST_PUBLICATION_CODE)
+                .hasFieldOrPropertyWithValue("issue", TEST_PUBLICATION_ISSUE)
+                .hasFieldOrPropertyWithValue("language", TEST_PUBLICATION_LANGUAGE)
+                .hasFieldOrPropertyWithValue("title", TEST_PUBLICATION_TITLE);
+    }
+
+    private void addTestPublication() throws IOException {
+        try (
+                FileInputStream fileInputStream = new FileInputStream(TestUtils.getDataFile(TestConsts.TEST_PUBLICATION_FILENAME))
+        ) {
+            publicationService.add(fileInputStream);
+        }
+    }
+
+    @DisplayName("должен проверять перечень публикаций")
+    @Test
+    void shouldGetPublications() throws Exception {
+        addTestPublication();
+
         mockMvc.perform(get("/publication").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(START_ID))
                 .andExpect(jsonPath("$[0].code").value(TEST_PUBLICATION_CODE))
                 .andExpect(jsonPath("$[0].issue").value(TEST_PUBLICATION_ISSUE))
                 .andExpect(jsonPath("$[0].language").value(TEST_PUBLICATION_LANGUAGE))
+                .andReturn();
+    }
+
+    @DisplayName("должен возвращать контент")
+    @Test
+    void shouldGetContent() throws Exception {
+        addTestPublication();
+
+        mockMvc.perform(get("/publication/{id}/content", START_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name").value(TEST_PUBLICATION_TITLE))
+                .andExpect(jsonPath("$[0].children[0].name").value(TEST_SECTION_TITLE))
+                .andExpect(jsonPath("$[0].children[0].children[0].name").value(containsString(TEST_DM_CODE)))
                 .andReturn();
     }
 }

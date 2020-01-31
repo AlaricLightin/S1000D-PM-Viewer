@@ -3,6 +3,8 @@ package ru.biderman.s1000dpmviewer.domain;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
+import org.w3c.dom.Document;
+import ru.biderman.s1000dpmviewer.utils.XMLDocumentUtils;
 
 import javax.persistence.*;
 
@@ -22,4 +24,8 @@ public class Publication {
 
     @OneToOne(mappedBy = "publication", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private PublicationDetails details;
+
+    public Document getDocument() {
+        return XMLDocumentUtils.getDocumentFromString(xml);
+    }
 }

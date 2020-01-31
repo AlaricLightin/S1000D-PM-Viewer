@@ -38,6 +38,7 @@
     </identAndStatusSection>
     <content>
         <pmEntry>
+            <pmEntryTitle>Название секции</pmEntryTitle>
             <dmRef>
                 <dmRefIdent>
                     <dmCode modelIdentCode="TEST1" systemDiffCode="A" systemCode="111" subSystemCode="1" subSubSystemCode="1" assyCode="11" disassyCode="11" disassyCodeVariant="A" infoCode="110" infoCodeVariant="A" itemLocationCode="A"></dmCode>
