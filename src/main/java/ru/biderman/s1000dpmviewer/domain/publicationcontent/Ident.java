@@ -25,6 +25,10 @@ public class Ident {
         return language;
     }
 
+    public boolean isValidVersion() {
+        return code != null && !code.isEmpty() && issue != null && !issue.isEmpty() && language != null && !language.isEmpty();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

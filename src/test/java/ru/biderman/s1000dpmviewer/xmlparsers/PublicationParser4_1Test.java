@@ -4,20 +4,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.w3c.dom.Document;
 import ru.biderman.s1000dpmviewer.domain.Publication;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
+import ru.biderman.s1000dpmviewer.exceptions.InvalidPublicationException;
 import ru.biderman.s1000dpmviewer.utils.TestUtils;
 import ru.biderman.s1000dpmviewer.utils.XMLDocumentUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static ru.biderman.s1000dpmviewer.utils.TestConsts.*;
 import static ru.biderman.s1000dpmviewer.utils.TestUtils.getDataFile;
 
@@ -37,7 +43,7 @@ class PublicationParser4_1Test {
 
     @DisplayName("должен получать детали публикации")
     @Test
-    void shouldGetPublicationDetails() {
+    void shouldGetPublicationDetails() throws Exception{
         Document document = XMLDocumentUtils.getDocumentFromFile(getDataFile(TEST_PUBLICATION_FILENAME));
         assertThat(document).isNotNull();
 
@@ -51,7 +57,7 @@ class PublicationParser4_1Test {
 
     @DisplayName("должен создавать публикацию по входному потоку")
     @Test
-    void shouldCreateByInputStream() throws IOException {
+    void shouldCreateByInputStream() throws Exception {
         ZonedDateTime currentTime = ZonedDateTime.now();
         Path dataPath = TestUtils.getDataPath(TEST_PUBLICATION_FILENAME);
         Publication result;
@@ -71,6 +77,19 @@ class PublicationParser4_1Test {
                 .satisfies(publication -> assertThat(publication.getXml())
                         .contains(TEST_PUBLICATION_CODE_XML_STRING)
                 );
+    }
+
+    @DisplayName("должен возвращать ошибку при неверных входных данных")
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "Invalid data",
+            "<pm></pm>",
+            "<pm><pmIdentAndStatusSection/></pm>",
+            "<pm><pmIdentAndStatusSection><pmIdent></pmIdent></pmIdentAndStatusSection></pm>"
+    })
+    void shouldThrowExceptionIfInvalidPublicationData(String data) {
+        InputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+        assertThrows(InvalidPublicationException.class, () -> parser.createPublication(inputStream));
     }
 
     @DisplayName("должен получать контент публикации")

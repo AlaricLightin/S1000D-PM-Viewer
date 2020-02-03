@@ -17,7 +17,6 @@ import ru.biderman.s1000dpmviewer.utils.TestConsts;
 import ru.biderman.s1000dpmviewer.utils.TestUtils;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,7 +69,7 @@ public class PublicationControllerTest {
                 .hasFieldOrPropertyWithValue("title", TEST_PUBLICATION_TITLE);
     }
 
-    private void addTestPublication() throws IOException {
+    private void addTestPublication() throws Exception {
         try (
                 FileInputStream fileInputStream = new FileInputStream(TestUtils.getDataFile(TestConsts.TEST_PUBLICATION_FILENAME))
         ) {

@@ -3,6 +3,9 @@ package ru.biderman.s1000dpmviewer.rest;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,16 +17,21 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ru.biderman.s1000dpmviewer.domain.Publication;
 import ru.biderman.s1000dpmviewer.domain.PublicationDetails;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
+import ru.biderman.s1000dpmviewer.exceptions.ErrorCodes;
+import ru.biderman.s1000dpmviewer.exceptions.InvalidPublicationException;
+import ru.biderman.s1000dpmviewer.exceptions.PublicationAlreadyExistsException;
 import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
 import ru.biderman.s1000dpmviewer.rest.dto.ContentItem;
 import ru.biderman.s1000dpmviewer.services.PublicationDetailsService;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -59,6 +67,11 @@ class PublicationControllerTest {
         return result;
     }
 
+    private MockMultipartFile createTestMultipartFile(String content) throws IOException {
+        InputStream contentStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        return new MockMultipartFile("file", contentStream);
+    }
+
     @DisplayName("должен возвращать детали всех публикаций")
     @Test
     void shouldGetAllDetail() throws Exception{
@@ -81,8 +94,7 @@ class PublicationControllerTest {
     @Test
     void shouldLoadPublicationFile() throws Exception {
         final String content = "Test stream";
-        InputStream contentStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-        MockMultipartFile multipartFile = new MockMultipartFile("file", contentStream);
+        MockMultipartFile multipartFile = createTestMultipartFile(content);
 
         PublicationDetails details = createTestDetails(PUB_ID, PUB_CODE);
         Publication result = mock(Publication.class);
@@ -107,6 +119,25 @@ class PublicationControllerTest {
         ArgumentCaptor<InputStream> argumentCaptor = ArgumentCaptor.forClass(InputStream.class);
         verify(publicationService).add(argumentCaptor.capture());
         assertThat(IOUtils.toString(argumentCaptor.getValue(), StandardCharsets.UTF_8)).isEqualTo(content);
+    }
+
+    @DisplayName("должен сообщать об ошибке, если при добавлении случилась ошибка")
+    @ParameterizedTest
+    @MethodSource("addErrorData")
+    void shouldSendBadRequestIfCouldNotAdd(Class<? extends Throwable> exceptionClass, int errorCode) throws Exception{
+        doThrow(exceptionClass).when(publicationService).add(any());
+        MockMultipartFile multipartFile = createTestMultipartFile("Some content");
+        mockMvc.perform(multipart("/publication").file(multipartFile))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value(errorCode))
+                .andReturn();
+    }
+
+    private static Stream<Arguments> addErrorData() {
+        return Stream.of(
+                Arguments.of(InvalidPublicationException.class, ErrorCodes.INVALID_PUBLICATION),
+                Arguments.of(PublicationAlreadyExistsException.class, ErrorCodes.PUBLICATION_ALREADY_EXISTS)
+        );
     }
 
     @DisplayName("должен удалять публикацию")

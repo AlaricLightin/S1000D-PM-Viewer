@@ -19,12 +19,11 @@ class PublicationContentParser4_1 {
 
         HashMap<String, Function<Element, EntryElement>> functionMap = new HashMap<>();
         functionMap.put("pmEntry", PublicationContentParser4_1::createPMEntry);
-        Element content = XMLParseUtils.getElement(document, "//content");
-        List<EntryElement> list;
-        if (content != null) // TODO обработка ошибок
-            list = XMLParseUtils.getChildList(content, functionMap);
-        else
-            list = Collections.emptyList();
+
+        List<EntryElement> list = XMLParseUtils.getElement(document, "//content")
+                .map(content -> XMLParseUtils.getChildList(content, functionMap))
+                .orElse(Collections.emptyList());
+
         return new Entry(title, list);
     }
 
@@ -41,23 +40,25 @@ class PublicationContentParser4_1 {
     }
 
     static DMRef createDmRef(Element dmRef) {
-        Element dmRefIdent = XMLParseUtils.getFirstChildElement(dmRef, "dmRefIdent");
+        Element dmRefIdent = XMLParseUtils.getFirstChildElement(dmRef, "dmRefIdent").orElse(null);
         if (dmRefIdent == null)
             return null;
 
         Ident ident = IdentParser4_1.createDMIdent(dmRefIdent);
-        String title = "";
-        Element dmTitle = XMLParseUtils.getElement(dmRef, "dmRefAddressItems/dmTitle");
-        if (dmTitle != null) {
-            title = XMLParseUtils.getTextFromChildElement(dmTitle, "techName");
-            String infoName = XMLParseUtils.getTextFromChildElement(dmTitle, "infoName");
-            if (!title.isEmpty()) {
-                if (!infoName.isEmpty())
-                    title = title + " - " + infoName;
-            }
-            else
-                title = infoName;
-        }
+        String title = XMLParseUtils.getElement(dmRef, "dmRefAddressItems/dmTitle")
+                .map(dmTitle -> {
+                    String result = XMLParseUtils.getTextFromChildElement(dmTitle, "techName");
+                    String infoName = XMLParseUtils.getTextFromChildElement(dmTitle, "infoName");
+                    if (!result.isEmpty()) {
+                        if (!infoName.isEmpty())
+                            result = result + " - " + infoName;
+                    }
+                    else
+                        result = infoName;
+
+                    return result;
+                })
+                .orElse("");
 
         return new DMRef(ident, title);
     }

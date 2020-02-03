@@ -3,8 +3,12 @@ package ru.biderman.s1000dpmviewer.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.biderman.s1000dpmviewer.domain.Publication;
+import ru.biderman.s1000dpmviewer.domain.PublicationDetails;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
+import ru.biderman.s1000dpmviewer.exceptions.InvalidPublicationException;
+import ru.biderman.s1000dpmviewer.exceptions.PublicationAlreadyExistsException;
 import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
+import ru.biderman.s1000dpmviewer.repositories.PublicationDetailsRepository;
 import ru.biderman.s1000dpmviewer.repositories.PublicationRepository;
 import ru.biderman.s1000dpmviewer.xmlparsers.PublicationParser;
 
@@ -15,13 +19,18 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class PublicationServiceImpl implements PublicationService {
     private final PublicationRepository publicationRepository;
+    private final PublicationDetailsRepository detailsRepository;
     private final PublicationParser parser;
 
     @Override
-    // TODO сделать обработку исключений, когда публикация не создалась или когда такая уже есть
-    public Publication add(InputStream inputStream) {
+    @Transactional
+    public Publication add(InputStream inputStream) throws InvalidPublicationException, PublicationAlreadyExistsException {
         Publication newPublication = parser.createPublication(inputStream);
-        return publicationRepository.save(newPublication);
+        PublicationDetails details = newPublication.getDetails();
+        if (!detailsRepository.existsByCodeAndIssueAndLanguage(details.getCode(), details.getIssue(), details.getLanguage()))
+            return publicationRepository.save(newPublication);
+        else
+            throw new PublicationAlreadyExistsException();
     }
 
     @Override

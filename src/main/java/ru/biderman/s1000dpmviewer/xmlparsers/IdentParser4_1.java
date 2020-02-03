@@ -11,16 +11,16 @@ class IdentParser4_1 {
         assert identElement != null;
         String code = codeFunction.apply(identElement);
         String issue = XMLParseUtils.getDelimitedTextFromAttrs(identElement, "issueInfo",
-                "issueNumber", "inWork");
+                "issueNumber", "inWork").orElse(null);
         String language = XMLParseUtils.getDelimitedTextFromAttrs(identElement, "language",
-                "languageIsoCode", "countryIsoCode");
+                "languageIsoCode", "countryIsoCode").orElse(null);
 
         return new Ident(code, issue, language);
     }
 
     private static String getPmCode(Element identElement) {
         return XMLParseUtils.getDelimitedTextFromAttrs(identElement, "pmCode",
-                "modelIdentCode", "pmIssuer", "pmNumber", "pmVolume");
+                "modelIdentCode", "pmIssuer", "pmNumber", "pmVolume").orElse("");
     }
 
     static Ident createPMIdent(Element pmIdent) {
@@ -28,7 +28,7 @@ class IdentParser4_1 {
     }
 
     private static String getDMCode(Element dmIdent) {
-        Element dmCodeElement = XMLParseUtils.getFirstChildElement(dmIdent, "dmCode");
+        Element dmCodeElement = XMLParseUtils.getFirstChildElement(dmIdent, "dmCode").orElse(null);
         if (dmCodeElement == null)
             return "";
 

@@ -11,8 +11,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ru.biderman.s1000dpmviewer.domain.Publication;
 import ru.biderman.s1000dpmviewer.domain.PublicationDetails;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
+import ru.biderman.s1000dpmviewer.exceptions.CustomBadRequestException;
+import ru.biderman.s1000dpmviewer.exceptions.InvalidPublicationException;
+import ru.biderman.s1000dpmviewer.exceptions.PublicationAlreadyExistsException;
 import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
 import ru.biderman.s1000dpmviewer.rest.dto.ContentItem;
+import ru.biderman.s1000dpmviewer.rest.dto.CustomExceptionDto;
 import ru.biderman.s1000dpmviewer.services.PublicationDetailsService;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
 
@@ -33,7 +37,8 @@ public class PublicationController {
 
     @PostMapping(value = "/publication", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PublicationDetails> uploadPublication(@RequestPart("file") MultipartFile file,
-                                                                UriComponentsBuilder builder) throws IOException {
+                                                                UriComponentsBuilder builder)
+            throws IOException, InvalidPublicationException, PublicationAlreadyExistsException {
         Publication publication = publicationService.add(file.getInputStream());
         UriComponents uriComponents = builder.path("/publication/{id}").buildAndExpand(publication.getId());
         return ResponseEntity.created(uriComponents.toUri()).body(publication.getDetails());
@@ -54,5 +59,11 @@ public class PublicationController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public void publicationNotFoundHandler() {
 
+    }
+
+    @ExceptionHandler(CustomBadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public CustomExceptionDto badRequestExceptionHandler(CustomBadRequestException exception) {
+        return CustomExceptionDto.createFromException(exception);
     }
 }

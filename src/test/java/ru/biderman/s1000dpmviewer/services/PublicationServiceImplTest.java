@@ -7,8 +7,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.w3c.dom.Document;
 import ru.biderman.s1000dpmviewer.domain.Publication;
+import ru.biderman.s1000dpmviewer.domain.PublicationDetails;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
+import ru.biderman.s1000dpmviewer.exceptions.InvalidPublicationException;
+import ru.biderman.s1000dpmviewer.exceptions.PublicationAlreadyExistsException;
 import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
+import ru.biderman.s1000dpmviewer.repositories.PublicationDetailsRepository;
 import ru.biderman.s1000dpmviewer.repositories.PublicationRepository;
 import ru.biderman.s1000dpmviewer.xmlparsers.PublicationParser;
 
@@ -25,27 +29,66 @@ class PublicationServiceImplTest {
     private PublicationServiceImpl publicationService;
     private PublicationRepository publicationRepository;
     private PublicationParser publicationParser;
+    private PublicationDetailsRepository detailsRepository;
 
     private final static long PUBLICATION_ID = 101;
+
+    private final static String MOCK_PUBLICATION_CODE = "CODE";
+    private final static String MOCK_PUBLICATION_LANGUAGE = "LANGUAGE";
+    private final static String MOCK_PUBLICATION_ISSUE = "ISSUE";
+
+    private Publication createMockPublication() {
+        Publication publication = mock(Publication.class);
+
+        PublicationDetails details = mock(PublicationDetails.class);
+        when(details.getCode()).thenReturn(MOCK_PUBLICATION_CODE);
+        when(details.getLanguage()).thenReturn(MOCK_PUBLICATION_LANGUAGE);
+        when(details.getIssue()).thenReturn(MOCK_PUBLICATION_ISSUE);
+        when(publication.getDetails()).thenReturn(details);
+        return publication;
+    }
 
     @BeforeEach
     void init() {
         publicationRepository = mock(PublicationRepository.class);
         publicationParser = mock(PublicationParser.class);
-        publicationService = new PublicationServiceImpl(publicationRepository, publicationParser);
+        detailsRepository = mock(PublicationDetailsRepository.class);
+        publicationService = new PublicationServiceImpl(publicationRepository, detailsRepository, publicationParser);
     }
 
     @DisplayName("должен добавлять публикацию")
     @Test
-    void shouldAddPublication() {
+    void shouldAddPublication() throws Exception{
         InputStream inputStream = mock(InputStream.class);
-        Publication publication = mock(Publication.class);
+        Publication publication = createMockPublication();
         Publication expectedSavedPublication = mock(Publication.class);
         when(publicationParser.createPublication(inputStream)).thenReturn(publication);
+        when(detailsRepository.existsByCodeAndIssueAndLanguage(
+                MOCK_PUBLICATION_CODE, MOCK_PUBLICATION_ISSUE, MOCK_PUBLICATION_LANGUAGE)).thenReturn(false);
         when(publicationRepository.save(publication)).thenReturn(expectedSavedPublication);
 
         Publication savedPublication = publicationService.add(inputStream);
         assertThat(savedPublication).isEqualTo(expectedSavedPublication);
+    }
+
+    @DisplayName("должен бросать исключение, если не удалось распарсить публикацию")
+    @Test
+    void shouldThrowExceptionIfCouldNotParse() throws InvalidPublicationException {
+        InputStream inputStream = mock(InputStream.class);
+        doThrow(InvalidPublicationException.class).when(publicationParser).createPublication(inputStream);
+        assertThrows(InvalidPublicationException.class, () -> publicationService.add(inputStream));
+    }
+
+    @DisplayName("должен бросать исключение, если публикация с такими идентификационными данными уже есть")
+    @Test
+    void shouldThrowExceptionIfPublicationExists() throws Exception {
+        InputStream inputStream = mock(InputStream.class);
+        Publication publication = createMockPublication();
+        when(publicationParser.createPublication(inputStream)).thenReturn(publication);
+        when(detailsRepository.existsByCodeAndIssueAndLanguage(
+                MOCK_PUBLICATION_CODE, MOCK_PUBLICATION_ISSUE, MOCK_PUBLICATION_LANGUAGE))
+                .thenReturn(true);
+        assertThrows(PublicationAlreadyExistsException.class, () -> publicationService.add(inputStream));
     }
 
     @DisplayName("должен возвращать публикацию по id")

@@ -11,6 +11,7 @@ import org.w3c.dom.Element;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -22,10 +23,12 @@ class XMLParseUtilsTest {
     @Test
     void shouldGetFirstElement() {
         Document document = XMLDocumentUtils.getDocumentFromString("<a><b/><c/></a>");
-        Element element = XMLParseUtils.getFirstChildElement(document.getDocumentElement(), "c");
+        Optional<Element> element = XMLParseUtils.getFirstChildElement(document.getDocumentElement(), "c");
         assertThat(element)
-                .isNotNull()
-                .satisfies(e -> assertThat(e.getTagName()).isEqualTo("c"));
+                .isPresent()
+                .map(Element::getTagName)
+                .get()
+                .isEqualTo("c");
     }
 
     @DisplayName("должен возвращать текст из первого подэлемента")
@@ -41,10 +44,12 @@ class XMLParseUtilsTest {
     @Test
     void shouldGetElementByPath() {
         Document document = XMLDocumentUtils.getDocumentFromString("<a><b><c/></b></a>");
-        Element element = XMLParseUtils.getElement(document.getDocumentElement(), "//c");
+        Optional<Element> element = XMLParseUtils.getElement(document.getDocumentElement(), "//c");
         assertThat(element)
-                .isNotNull()
-                .satisfies(e -> assertThat(e.getTagName()).isEqualTo("c"));
+                .isPresent()
+                .map(Element::getTagName)
+                .get()
+                .isEqualTo("c");
     }
 
     @DisplayName("должен возвращать текст из подэлемента по пути")
@@ -60,17 +65,23 @@ class XMLParseUtilsTest {
     @Test
     void shouldGetTextByAttrs() {
         Document document = XMLDocumentUtils.getDocumentFromString("<root><a attr1=\"a\" attr2=\"b\"/></root>");
-        String result = XMLParseUtils.getDelimitedTextFromAttrs(
+        Optional<String> result = XMLParseUtils.getDelimitedTextFromAttrs(
                 document.getDocumentElement(), "a", "attr1", "attr2");
-        assertThat(result).isEqualTo("a-b");
+        assertThat(result)
+                .isPresent()
+                .get()
+                .isEqualTo("a-b");
     }
 
     @DisplayName("должен получать дату из элемента")
     @Test
     void shouldGetDateFromElement() {
         Document document = XMLDocumentUtils.getDocumentFromString("<root><date year=\"2000\" month=\"04\" day=\"08\"/></root>");
-        LocalDate result = XMLParseUtils.getDate(document.getDocumentElement(), "date");
-        assertThat(result).isEqualTo(LocalDate.of(2000, 4, 8));
+        Optional<LocalDate> result = XMLParseUtils.getDate(document.getDocumentElement(), "date");
+        assertThat(result)
+                .isPresent()
+                .get()
+                .isEqualTo(LocalDate.of(2000, 4, 8));
     }
 
     private static Stream<Arguments> attrValueData() {
