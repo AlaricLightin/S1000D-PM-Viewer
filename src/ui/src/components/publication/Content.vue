@@ -1,5 +1,7 @@
 <template>
     <div>
+        <LoadingErrorAlert v-if="loadingError"/>
+
         <v-treeview ref="treeView"
                     open-all
                     :items="items"
@@ -9,12 +11,14 @@
 
 <script>
     import axios from "axios";
+    import LoadingErrorAlert from "../errors/LoadingErrorAlert";
 
     export default {
         name: "Content",
-
+        components: {LoadingErrorAlert},
         data: () => ({
             items: [],
+            loadingError: false
         }),
 
         // watch: {
@@ -32,7 +36,8 @@
                     .then(r => {
                         this.items = r.data;
                         this.$refs["treeView"].updateAll(true);
-                    }); //TODO обработка ошибок
+                    })
+                    .catch(() => this.loadingError = true);
             }
         }
     }

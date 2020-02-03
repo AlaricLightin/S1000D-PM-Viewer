@@ -11,7 +11,6 @@ public class S1000dPmViewerApplication {
     }
 
 }
-// TODO обработка ошибок во фронтенде (+ отвалился сервер)
 // TODO security
 // TODO не забыть про csrf
 // TODO разобраться, нельзя ли сделать в Publication поле типа XML (Document)

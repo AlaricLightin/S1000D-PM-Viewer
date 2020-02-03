@@ -5,7 +5,12 @@
         </template>
         <v-card>
             <v-card-title class="headline">Удаление публикации</v-card-title>
-            <v-card-text>Вы действительно хотите удалить публикацию?</v-card-text>
+            <v-card-text>
+                <p>Вы действительно хотите удалить публикацию?</p>
+                <v-alert v-model="showErrorAlert" type="error" dismissible>
+                    Не удалось удалить публикацию.
+                </v-alert>
+            </v-card-text>
             <v-card-actions>
                 <v-spacer>
                     <v-btn text @click="deletePublication()">Удалить</v-btn>
@@ -27,13 +32,15 @@
         data () {
             return {
                 dialog: false,
+                showErrorAlert: false,
             }
         },
 
         methods: {
             deletePublication() {
-                // TODO обработать возможные ошибки
-                this.$store.dispatch('publications/delete', this.publication.id);
+                this.showErrorAlert = false;
+                this.$store.dispatch('publications/delete', this.publication.id)
+                    .catch(() => this.showErrorAlert = true)
             }
         }
     }

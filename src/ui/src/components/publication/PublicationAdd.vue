@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="dialog" max-width="800px">
         <template v-slot:activator="{ on }">
-            <v-btn v-on="on">Добавить</v-btn>
+            <v-btn v-bind:disabled="disabled" v-on="on">Добавить</v-btn>
         </template>
         <v-card>
             <v-card-title>
@@ -14,6 +14,11 @@
                                   show-size
                                   @change="fileChanged"
                     />
+                    <v-alert v-model="showErrorAlert"
+                             dismissible
+                             type="error">
+                        {{loadingErrorText}}
+                    </v-alert>
                 </v-container>
             </v-card-text>
             <v-card-actions>
@@ -28,15 +33,20 @@
 </template>
 
 <script>
-    // TODO https://stackoverflow.com/questions/40165766/returning-promises-from-vuex-actions
     // TODO написать ограничение по величине загружаемого файла
     export default {
         name: "PublicationAdd",
 
+        props: {
+            disabled: Boolean
+        },
+
         data: () => ({
             dialog: false,
             file: null,
-            loading: false
+            loading: false,
+            showErrorAlert: false,
+            loadingErrorText: null,
         }),
 
         computed: {
@@ -52,11 +62,26 @@
 
             submitFile() {
                 this.loading = true;
+                this.showErrorAlert = false;
+                this.loadingErrorText = null;
                 this.$store.dispatch('publications/add', this.file)
-                    .then(() => this.dialog = false)
-                    // TODO обработать возможные ошибки
-                    .catch(() => this.loading = false);
-            }
+                    .then(() => {
+                        this.loading = false;
+                        this.dialog = false;
+                    })
+                    .catch((error) => {
+                        this.loading = false;
+                        if(error.response && error.response.data) {
+                            // TODO Сделать более человекочитаемые результаты
+                            // TODO предусмотреть, что тут может быть не 400, а 500
+                            this.loadingErrorText = 'Код ошибки: ' + error.response.data.errorCode;
+                        }
+                        else {
+                            this.loadingErrorText = 'Нет связи с сервером';
+                        }
+                        this.showErrorAlert = true;
+                    });
+            },
         }
     }
 </script>

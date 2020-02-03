@@ -1,40 +1,55 @@
 <template>
-    <v-list>
-        <v-list-item three-line
-                     v-for="publication in this.publications"
-                     :key="publication.id"
-                     @click="$router.push({name: 'Content', params: {id: publication.id}})"
-        >
-            <v-list-item-content>
-                <v-list-item-title>{{`[${publication.code}] ${publication.title}`}}</v-list-item-title>
-                <v-list-item-subtitle>{{`Версия: ${publication["issue"]}, язык: ${publication.language},
-                    дата создания: ${getDateString(publication["issueDate"])},
-                    дата и время загрузки: ${getDateTimeString(publication["loadDateTime"])}`}}</v-list-item-subtitle>
-            </v-list-item-content>
+    <div>
+        <LoadingErrorAlert v-if="loadingError"/>
 
-            <v-list-item-action>
-                <v-btn>Права доступа</v-btn>
-                <PublicationDelete :publication="publication"/>
-            </v-list-item-action>
-        </v-list-item>
-    </v-list>
+        <v-list>
+            <v-list-item three-line
+                         v-for="publication in this.publications"
+                         :key="publication.id"
+            >
+                <v-list-item-content>
+                    <v-list-item-title>{{`[${publication.code}] ${publication.title}`}}</v-list-item-title>
+                    <v-list-item-subtitle>{{`Версия: ${publication["issue"]}, язык: ${publication.language},
+                        дата создания: ${getDateString(publication["issueDate"])},
+                        дата и время загрузки: ${getDateTimeString(publication["loadDateTime"])}`}}
+                    </v-list-item-subtitle>
+                </v-list-item-content>
+
+                <v-list-item-action>
+                    <v-btn @click="$router.push({name: 'Content', params: {id: publication.id}})">Просмотр</v-btn>
+                    <v-btn>Права доступа</v-btn>
+                    <PublicationDelete :publication="publication"/>
+                </v-list-item-action>
+            </v-list-item>
+        </v-list>
+
+        <PublicationAdd v-bind:disabled="loadingError"/>
+    </div>
 </template>
 
 <script>
+    // TODO сделать древовидную структуру
     import {mapState} from "vuex";
     import PublicationDelete from "./PublicationDelete";
+    import PublicationAdd from "./PublicationAdd";
+    import LoadingErrorAlert from "../errors/LoadingErrorAlert";
 
     export default {
         name: "PublicationList",
-        components: {PublicationDelete},
+        components: {LoadingErrorAlert, PublicationDelete, PublicationAdd},
         computed: {
             ...mapState({
                 publications: state => state.publications.all
             })
         },
 
+        data: () => ({
+            loadingError: false
+        }),
+
         mounted() {
-            this.$store.dispatch('publications/load');
+            this.$store.dispatch('publications/load')
+                .catch(() => this.loadingError = true);
         },
 
         methods: {
