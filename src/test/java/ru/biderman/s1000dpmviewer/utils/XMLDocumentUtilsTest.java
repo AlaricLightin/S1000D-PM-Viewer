@@ -18,8 +18,8 @@ class XMLDocumentUtilsTest {
         Document document = XMLDocumentUtils.getDocumentFromFile(getDataFile("pub1.xml"));
         assertThat(document)
                 .isNotNull()
-                .satisfies(d ->
-                        assertThat(d.getDocumentElement().getTagName()).isEqualTo("pm"));
+                .extracting(d -> d.getDocumentElement().getTagName())
+                .isEqualTo("pm");
     }
 
     @DisplayName("должны считывать XML из строки")
@@ -28,7 +28,8 @@ class XMLDocumentUtilsTest {
         Document document = XMLDocumentUtils.getDocumentFromString("<a></a>");
         assertThat(document)
                 .isNotNull()
-                .satisfies(d -> assertThat(d.getDocumentElement().getTagName()).isEqualTo("a"));
+                .extracting(d -> d.getDocumentElement().getTagName())
+                .isEqualTo("a");
     }
 
     @DisplayName("должны сохранять xml в строку")

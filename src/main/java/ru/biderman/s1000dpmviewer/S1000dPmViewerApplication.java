@@ -11,7 +11,6 @@ public class S1000dPmViewerApplication {
     }
 
 }
-// TODO пройти по всем satisfy в тестах и посмотреть, нельзя ли от них избавиться с помощью extracting (или чего-то ещё)
 // TODO обработка ошибок во фронтенде (+ отвалился сервер)
 // TODO security
 // TODO не забыть про csrf
