@@ -11,7 +11,12 @@ public class S1000dPmViewerApplication {
     }
 
 }
-// TODO security
+
+// TODO dto пользователей ?
 // TODO не забыть про csrf
+// TODO простейшая security на фронтенде
+
+// TODO дополнительное поле: кто добавил публикацию
+
 // TODO разобраться, нельзя ли сделать в Publication поле типа XML (Document)
 // TODO попробовать отделить интеграционные тесты на postgres?

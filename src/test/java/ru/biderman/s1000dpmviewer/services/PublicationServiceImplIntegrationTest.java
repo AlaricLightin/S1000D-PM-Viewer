@@ -8,14 +8,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.biderman.s1000dpmviewer.domain.Publication;
-import ru.biderman.s1000dpmviewer.utils.TestConsts;
+import ru.biderman.s1000dpmviewer.testutils.TestConsts;
 import ru.biderman.s1000dpmviewer.xmlparsers.PublicationParser4_1;
 
 import java.io.FileInputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static ru.biderman.s1000dpmviewer.utils.TestConsts.*;
-import static ru.biderman.s1000dpmviewer.utils.TestUtils.getDataFile;
+import static ru.biderman.s1000dpmviewer.testutils.TestConsts.*;
+import static ru.biderman.s1000dpmviewer.testutils.TestUtils.getDataFile;
 
 @DataJpaTest
 @Import({PublicationServiceImpl.class, PublicationParser4_1.class})

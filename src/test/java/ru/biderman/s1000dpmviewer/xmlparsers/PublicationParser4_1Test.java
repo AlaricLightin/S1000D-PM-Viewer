@@ -11,7 +11,7 @@ import org.w3c.dom.Document;
 import ru.biderman.s1000dpmviewer.domain.Publication;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
 import ru.biderman.s1000dpmviewer.exceptions.InvalidPublicationException;
-import ru.biderman.s1000dpmviewer.utils.TestUtils;
+import ru.biderman.s1000dpmviewer.testutils.TestUtils;
 import ru.biderman.s1000dpmviewer.utils.XMLDocumentUtils;
 
 import java.io.ByteArrayInputStream;
@@ -24,8 +24,8 @@ import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static ru.biderman.s1000dpmviewer.utils.TestConsts.*;
-import static ru.biderman.s1000dpmviewer.utils.TestUtils.getDataFile;
+import static ru.biderman.s1000dpmviewer.testutils.TestConsts.*;
+import static ru.biderman.s1000dpmviewer.testutils.TestUtils.getDataFile;
 
 @ExtendWith(SpringExtension.class)
 @DisplayName("Парсер публикаций из формата 4.1 ")

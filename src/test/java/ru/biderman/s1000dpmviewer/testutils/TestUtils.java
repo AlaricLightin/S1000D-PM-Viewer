@@ -1,4 +1,4 @@
-package ru.biderman.s1000dpmviewer.utils;
+package ru.biderman.s1000dpmviewer.testutils;
 
 import java.io.File;
 import java.nio.file.Path;

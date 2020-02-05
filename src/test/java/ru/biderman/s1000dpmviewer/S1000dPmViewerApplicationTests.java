@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @DisplayName("Приложение ")
 class S1000dPmViewerApplicationTests {
 
+    @SuppressWarnings("EmptyMethod")
     @Test
     @DisplayName("должно создавать контекст")
     void contextLoads() {

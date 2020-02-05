@@ -8,13 +8,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import ru.biderman.s1000dpmviewer.domain.Publication;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
-import ru.biderman.s1000dpmviewer.utils.TestConsts;
+import ru.biderman.s1000dpmviewer.testutils.TestConsts;
 
 import java.io.FileInputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static ru.biderman.s1000dpmviewer.utils.TestConsts.*;
-import static ru.biderman.s1000dpmviewer.utils.TestUtils.getDataFile;
+import static ru.biderman.s1000dpmviewer.testutils.TestConsts.*;
+import static ru.biderman.s1000dpmviewer.testutils.TestUtils.getDataFile;
 
 @SpringBootTest
 @DisplayName("Сервис работы с публикациями (при интеграционном тесте с использованием БД Postgres) ")

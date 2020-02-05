@@ -3,7 +3,6 @@ package ru.biderman.s1000dpmviewer.utils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -13,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -82,13 +80,6 @@ class XMLParseUtilsTest {
                 .isPresent()
                 .get()
                 .isEqualTo(LocalDate.of(2000, 4, 8));
-    }
-
-    private static Stream<Arguments> attrValueData() {
-        return Stream.of(
-                Arguments.of("<a b=\"c\"/>", "b", "c"),
-                Arguments.of("<a/>", "b", "")
-        );
     }
 
     @DisplayName("должен парсить детей элемента в список")

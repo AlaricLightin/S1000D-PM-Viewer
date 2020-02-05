@@ -13,8 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.biderman.s1000dpmviewer.domain.PublicationDetails;
 import ru.biderman.s1000dpmviewer.services.PublicationDetailsService;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
-import ru.biderman.s1000dpmviewer.utils.TestConsts;
-import ru.biderman.s1000dpmviewer.utils.TestUtils;
+import ru.biderman.s1000dpmviewer.testutils.TestConsts;
+import ru.biderman.s1000dpmviewer.testutils.TestUtils;
+import ru.biderman.s1000dpmviewer.testutils.WithMockEditor;
 
 import java.io.FileInputStream;
 import java.util.Optional;
@@ -22,11 +23,12 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.biderman.s1000dpmviewer.utils.TestConsts.*;
+import static ru.biderman.s1000dpmviewer.testutils.SecurityTestUtils.getAdminAuthorizationHeader;
+import static ru.biderman.s1000dpmviewer.testutils.TestConsts.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -47,12 +49,13 @@ public class PublicationControllerTest {
 
     @DisplayName("должен добавлять публикацию из файла")
     @Test
+    @WithMockEditor
     void shouldAdd() throws Exception{
         try (
                 FileInputStream fileInputStream = new FileInputStream(TestUtils.getDataFile(TestConsts.TEST_PUBLICATION_FILENAME))
         ) {
             MockMultipartFile multipartFile = new MockMultipartFile("file", fileInputStream);
-            mockMvc.perform(multipart("/publication").file(multipartFile))
+            mockMvc.perform(multipart("/publication").file(multipartFile).with(csrf()))
                     .andExpect(status().isCreated())
                     .andReturn();
         }
@@ -106,5 +109,22 @@ public class PublicationControllerTest {
                 .andExpect(jsonPath("$[0].children[0].name").value(TEST_SECTION_TITLE))
                 .andExpect(jsonPath("$[0].children[0].children[0].name").value(containsString(TEST_DM_CODE)))
                 .andReturn();
+    }
+
+    @DisplayName("должен удалять публикацию (с проверкой безопасности)")
+    @Test
+    void shouldDeletePublication() throws Exception {
+        addTestPublication();
+
+        mockMvc.perform(delete("/publication/{id}", START_ID)
+                .with(csrf())
+                .header("Authorization", getAdminAuthorizationHeader())
+        )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Optional<PublicationDetails> details = detailsService.findById(START_ID);
+        assertThat(details)
+                .isEmpty();
     }
 }

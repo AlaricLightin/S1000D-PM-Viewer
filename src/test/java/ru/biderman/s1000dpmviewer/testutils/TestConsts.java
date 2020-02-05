@@ -1,4 +1,4 @@
-package ru.biderman.s1000dpmviewer.utils;
+package ru.biderman.s1000dpmviewer.testutils;
 
 public class TestConsts {
     public final static String TEST_PUBLICATION_FILENAME = "pub1.xml";

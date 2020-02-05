@@ -2,14 +2,18 @@ package ru.biderman.s1000dpmviewer.rest;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,9 +28,9 @@ import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
 import ru.biderman.s1000dpmviewer.rest.dto.ContentItem;
 import ru.biderman.s1000dpmviewer.services.PublicationDetailsService;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
+import ru.biderman.s1000dpmviewer.testutils.WithMockAdmin;
+import ru.biderman.s1000dpmviewer.testutils.WithMockEditor;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -36,12 +40,15 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ru.biderman.s1000dpmviewer.rest.ControllerTestUtils.createTestMultipartFile;
 
 
 @DisplayName("Контроллер по работе с публикациями ")
 @WebMvcTest(PublicationController.class)
+@Import(ControllerTestConfiguration.class)
 class PublicationControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -67,11 +74,6 @@ class PublicationControllerTest {
         return result;
     }
 
-    private MockMultipartFile createTestMultipartFile(String content) throws IOException {
-        InputStream contentStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-        return new MockMultipartFile("file", contentStream);
-    }
-
     @DisplayName("должен возвращать детали всех публикаций")
     @Test
     void shouldGetAllDetail() throws Exception{
@@ -92,6 +94,7 @@ class PublicationControllerTest {
 
     @DisplayName("должен загружать файл с новой публикацией")
     @Test
+    @WithMockEditor
     void shouldLoadPublicationFile() throws Exception {
         final String content = "Test stream";
         MockMultipartFile multipartFile = createTestMultipartFile(content);
@@ -102,7 +105,7 @@ class PublicationControllerTest {
         when(result.getDetails()).thenReturn(details);
         when(publicationService.add(any())).thenReturn(result);
 
-        mockMvc.perform(multipart("/publication").file(multipartFile))
+        mockMvc.perform(multipart("/publication").file(multipartFile).with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location",
                         UriComponentsBuilder.newInstance()
@@ -123,40 +126,48 @@ class PublicationControllerTest {
 
     @DisplayName("должен сообщать об ошибке, если при добавлении случилась ошибка")
     @ParameterizedTest
-    @MethodSource("addErrorData")
-    void shouldSendBadRequestIfCouldNotAdd(Class<? extends Throwable> exceptionClass, int errorCode) throws Exception{
+    @ArgumentsSource(AddErrorData.class)
+    @WithMockEditor
+    void shouldSendBadRequestIfCouldNotAdd(Class<? extends Throwable> exceptionClass, int errorCode) throws Exception {
         doThrow(exceptionClass).when(publicationService).add(any());
         MockMultipartFile multipartFile = createTestMultipartFile("Some content");
-        mockMvc.perform(multipart("/publication").file(multipartFile))
+        mockMvc.perform(multipart("/publication").file(multipartFile).with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value(errorCode))
                 .andReturn();
     }
 
-    private static Stream<Arguments> addErrorData() {
-        return Stream.of(
-                Arguments.of(InvalidPublicationException.class, ErrorCodes.INVALID_PUBLICATION),
-                Arguments.of(PublicationAlreadyExistsException.class, ErrorCodes.PUBLICATION_ALREADY_EXISTS)
-        );
+    static class AddErrorData implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) {
+            return Stream.of(
+                    Arguments.of(InvalidPublicationException.class, ErrorCodes.INVALID_PUBLICATION),
+                    Arguments.of(PublicationAlreadyExistsException.class, ErrorCodes.PUBLICATION_ALREADY_EXISTS)
+            );
+        }
     }
 
-    @DisplayName("должен удалять публикацию")
-    @Test
-    void shouldDelete() throws Exception {
-        mockMvc.perform(delete("/publication/{id}", PUB_ID))
-                .andExpect(status().isOk())
-                .andReturn();
+    @Nested
+    @WithMockAdmin
+    class Delete {
+        @DisplayName("должен удалять публикацию")
+        @Test
+        void shouldDelete() throws Exception {
+            mockMvc.perform(delete("/publication/{id}", PUB_ID).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andReturn();
 
-        verify(publicationService).deleteById(PUB_ID);
-    }
+            verify(publicationService).deleteById(PUB_ID);
+        }
 
-    @DisplayName("должен бросать исключение, если удаляемой публикации нет")
-    @Test
-    void shouldThrowExceptionIfDeletingAbsent() throws Exception{
-        doThrow(PublicationNotFoundException.class).when(publicationService).deleteById(PUB_ID);
-        mockMvc.perform(delete("/publication/{id}", PUB_ID))
-                .andExpect(status().isNotFound())
-                .andReturn();
+        @DisplayName("должен бросать исключение, если удаляемой публикации нет")
+        @Test
+        void shouldThrowExceptionIfDeletingAbsent() throws Exception {
+            doThrow(PublicationNotFoundException.class).when(publicationService).deleteById(PUB_ID);
+            mockMvc.perform(delete("/publication/{id}", PUB_ID).with(csrf()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+        }
     }
 
     @DisplayName("должен возвращать контент")

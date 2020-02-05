@@ -7,7 +7,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.w3c.dom.Document;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static ru.biderman.s1000dpmviewer.utils.TestUtils.getDataFile;
+import static ru.biderman.s1000dpmviewer.testutils.TestUtils.getDataFile;
 
 @ExtendWith(SpringExtension.class)
 @DisplayName("Утилиты работы с XML ")

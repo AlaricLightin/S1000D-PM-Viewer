@@ -10,8 +10,8 @@ import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
 import ru.biderman.s1000dpmviewer.utils.XMLDocumentUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static ru.biderman.s1000dpmviewer.utils.TestConsts.*;
-import static ru.biderman.s1000dpmviewer.utils.TestUtils.getDataFile;
+import static ru.biderman.s1000dpmviewer.testutils.TestConsts.*;
+import static ru.biderman.s1000dpmviewer.testutils.TestUtils.getDataFile;
 
 @ExtendWith(SpringExtension.class)
 @DisplayName("Класс по созданию контента публикации ")

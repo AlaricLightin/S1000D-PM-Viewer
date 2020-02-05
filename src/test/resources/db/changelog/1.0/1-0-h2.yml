@@ -10,3 +10,7 @@ databaseChangeLog:
         - sqlFile:
             path: no-xml-tables.sql
             relativeToChangelogFile: true
+
+        - sqlFile:
+            path: user-schema.sql
+            relativeToChangelogFile: true
