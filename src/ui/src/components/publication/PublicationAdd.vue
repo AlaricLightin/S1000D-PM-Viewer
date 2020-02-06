@@ -1,5 +1,8 @@
 <template>
-    <v-dialog v-model="dialog" max-width="800px">
+    <v-dialog v-if="isActive"
+              v-model="dialog"
+              persistent
+              max-width="800px">
         <template v-slot:activator="{ on }">
             <v-btn v-bind:disabled="disabled" v-on="on">Добавить</v-btn>
         </template>
@@ -15,7 +18,6 @@
                                   @change="fileChanged"
                     />
                     <v-alert v-model="showErrorAlert"
-                             dismissible
                              type="error">
                         {{loadingErrorText}}
                     </v-alert>
@@ -34,6 +36,8 @@
 
 <script>
     // TODO написать ограничение по величине загружаемого файла
+    import {mapGetters} from "vuex";
+
     export default {
         name: "PublicationAdd",
 
@@ -45,13 +49,20 @@
             dialog: false,
             file: null,
             loading: false,
-            showErrorAlert: false,
             loadingErrorText: null,
         }),
 
         computed: {
             needDisableSubmitButton: function () {
                 return !this.file || this.loading;
+            },
+
+            isActive: function () {
+                return this.isEditor();
+            },
+
+            showErrorAlert: function () {
+                return this.loadingErrorText !== null;
             }
         },
 
@@ -62,7 +73,6 @@
 
             submitFile() {
                 this.loading = true;
-                this.showErrorAlert = false;
                 this.loadingErrorText = null;
                 this.$store.dispatch('publications/add', this.file)
                     .then(() => {
@@ -74,6 +84,7 @@
                         if(error.response && error.response.data) {
                             // TODO Сделать более человекочитаемые результаты
                             // TODO предусмотреть, что тут может быть не 400, а 500
+                            // TODO предусмотреть ошибку авторизации
                             this.loadingErrorText = 'Код ошибки: ' + error.response.data.errorCode;
                         }
                         else {
@@ -82,6 +93,18 @@
                         this.showErrorAlert = true;
                     });
             },
+
+            ...mapGetters('authentication', [
+                'isEditor'
+            ])
+        },
+
+        watch: {
+            dialog: function(val, oldVal) {
+                if (val && !oldVal) {
+                    this.loadingErrorText = null;
+                }
+            }
         }
     }
 </script>

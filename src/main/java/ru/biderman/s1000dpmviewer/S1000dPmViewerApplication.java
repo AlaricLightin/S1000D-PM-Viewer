@@ -14,7 +14,6 @@ public class S1000dPmViewerApplication {
 
 // TODO dto пользователей ?
 // TODO не забыть про csrf
-// TODO простейшая security на фронтенде
 
 // TODO дополнительное поле: кто добавил публикацию
 

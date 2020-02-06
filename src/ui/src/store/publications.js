@@ -1,5 +1,3 @@
-import axios from 'axios'
-
 const state = {
     all: []
 };
@@ -25,33 +23,31 @@ const mutations = {
 };
 
 const actions = {
-    load({commit}) {
-        return axios
-            .get('/publication')
+    load({commit, rootGetters}) {
+        return rootGetters['authentication/getGetRequest']('/publication')
             .then(r => r.data)
             .then(publications => {
                 commit('SET_PUBLICATIONS', publications)
             })
     },
 
-    add({commit}, file){
+    add({commit, rootGetters}, file){
         let formData = new FormData();
         formData.append('file', file, file.name);
-        return axios
-            .post('publication',
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
+        return rootGetters['authentication/getPostRequest'](
+            '/publication',
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
                 }
-            )
+            })
             .then(r => r.data)
             .then(publication => commit('ADD_PUBLICATION', publication));
     },
 
-    delete({commit, getters}, id) {
-        return axios.delete('/publication/' + id)
+    delete({commit, getters, rootGetters}, id) {
+        return rootGetters['authentication/getDeleteRequest'](`/publication/${id}`)
             .then(() => {
                 const idx = getters.getIdx(id);
                 commit('DELETE_PUBLICATION', idx);

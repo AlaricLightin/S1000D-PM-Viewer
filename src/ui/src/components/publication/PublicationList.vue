@@ -2,7 +2,7 @@
     <div>
         <LoadingErrorAlert v-if="loadingError"/>
 
-        <v-list>
+        <v-list v-if="this.publications.length > 0">
             <v-list-item three-line
                          v-for="publication in this.publications"
                          :key="publication.id"
@@ -22,6 +22,9 @@
                 </v-list-item-action>
             </v-list-item>
         </v-list>
+        <template v-else>
+            <p>Нет загруженных публикаций.</p>
+        </template>
 
         <PublicationAdd v-bind:disabled="loadingError"/>
     </div>

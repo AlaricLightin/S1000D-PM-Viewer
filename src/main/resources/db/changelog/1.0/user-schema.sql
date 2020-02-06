@@ -21,3 +21,4 @@ insert into users(username, password, enabled) values ('editor', '$2y$12$mTQ8Y/m
 insert into authorities(username, authority) values ('editor', 'ROLE_EDITOR');
 
 insert into users(username, password, enabled) values ('user', '$2y$12$mTQ8Y/mnlItOsMUEH/EVJOuUF558ChpzWSLJ9HuB0cM.5eboqvftO', true);
+insert into authorities(username, authority) values ('user', 'ROLE_USER');
