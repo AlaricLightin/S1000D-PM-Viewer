@@ -5,44 +5,35 @@
             <v-btn @click="logoutClick()">Выйти</v-btn>
         </template>
 
-        <template v-else>
-            <v-dialog v-model="dialog" max-width="400">
-                <template v-slot:activator="{ on }">
-                    <v-btn v-on="on">Войти</v-btn>
-                </template>
-                <v-card>
-                    <v-card-title class="headline">Вход в систему</v-card-title>
-                    <v-card-text>
-                        <v-container>
-                            <v-alert v-if="showErrorAlert" type="error">
-                                Не удалось войти в систему.
-                            </v-alert>
+        <custom-dialog ref="main-dialog"
+                       v-else
+                       max-width="300px"
+                       main-button-caption="Войти"
+                       form-caption="Вход в систему"
+                       v-on:ok-button-click="loginClick"
+                       v-on:set-start-state="setStartState"
+        >
+            <template v-slot:alertText>Не удалось войти в систему.</template>
 
-                            <v-row>
-                                <v-text-field v-model="username" label="Имя пользователя" required/>
-                            </v-row>
-                            <v-row>
-                                <v-text-field v-model="password" label="Пароль" type="password" required/>
-                            </v-row>
-                        </v-container>
-                    </v-card-text>
-                    <v-card-actions>
-                        <v-spacer>
-                            <v-btn text @click="loginClick()">Войти</v-btn>
-                            <v-btn text @click="dialog = false">Отмена</v-btn>
-                        </v-spacer>
-                    </v-card-actions>
-                </v-card>
-            </v-dialog>
-        </template>
+            <template v-slot:mainComponents>
+                <v-row>
+                    <v-text-field v-model="username" label="Имя пользователя" required/>
+                </v-row>
+                <v-row>
+                    <v-text-field v-model="password" label="Пароль" type="password" required/>
+                </v-row>
+            </template>
+        </custom-dialog>
     </div>
 </template>
 
 <script>
+    import CustomDialog from "../customcomponents/CustomDialog";
     import {mapActions, mapState} from "vuex";
 
     export default {
-        name: "Login",
+        name: "login",
+        components: {CustomDialog},
 
         computed: {
             ...mapState({
@@ -52,8 +43,6 @@
 
         data() {
             return {
-                dialog: false,
-                showErrorAlert: false,
                 username: '',
                 password: ''
             }
@@ -65,26 +54,20 @@
                 'logout'
             ]),
 
-            loginClick() {
-                this.showErrorAlert = false;
+            loginClick: function () {
+                let mainDialog = this.$refs['main-dialog'];
                 // noinspection JSValidateTypes
                 this.login({username: this.username, password: this.password})
-                    .then(() => this.dialog = false)
-                    .catch(() => this.showErrorAlert = true);
+                    .catch(() => mainDialog.showAlert());
             },
 
             logoutClick() {
                 // noinspection JSValidateTypes
                 this.logout();
-            }
-        },
+            },
 
-        watch: {
-            dialog: function(val, oldVal) {
-                if (val && !oldVal) {
-                    this.showErrorAlert = false;
-                    this.password = '';
-                }
+            setStartState() {
+                this.password = '';
             }
         }
     }

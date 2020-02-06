@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-app-bar app>
-      <Login/>
+      <login/>
     </v-app-bar>
     <v-content>
       <v-container>
@@ -18,7 +18,7 @@
 
   export default {
     name: 'App',
-    components: {Login},
+    components: {login: Login},
     data: () => ({
       //
     }),

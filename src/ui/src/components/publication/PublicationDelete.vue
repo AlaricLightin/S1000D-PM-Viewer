@@ -1,34 +1,23 @@
 <template>
-    <v-dialog v-if="isActive"
-            v-model="dialog"
-            max-width="300">
-        <template v-slot:activator="{ on }">
-            <v-btn v-on="on">Удалить</v-btn>
-        </template>
-        <v-card>
-            <v-card-title class="headline">Удаление публикации</v-card-title>
-            <v-card-text>
-                <p>Вы действительно хотите удалить публикацию?</p>
-                <v-alert v-model="showErrorAlert" type="error">
-                    Не удалось удалить публикацию.
-                </v-alert>
-            </v-card-text>
-            <v-card-actions>
-                <v-spacer>
-                    <v-btn text @click="deletePublication()">Удалить</v-btn>
-                    <v-btn text @click="dialog = false">Отмена</v-btn>
-                </v-spacer>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <custom-dialog v-if="isActive"
+                   ref="main-dialog"
+                   max-width="300px"
+                   main-button-caption="Удалить"
+                   form-caption="Удаление публикации"
+                   v-on:ok-button-click="deletePublication"
+    >
+        <template v-slot:alertText>Не удалось удалить публикацию.</template>
+        <template v-slot:mainComponents><p>Вы действительно хотите удалить публикацию?</p></template>
+    </custom-dialog>
 </template>
 
 <script>
     import {mapGetters} from "vuex";
+    import CustomDialog from "../customcomponents/CustomDialog";
 
     export default {
         name: "PublicationDelete",
-
+        components: {CustomDialog},
         props: {
             publication: Object
         },
@@ -39,31 +28,16 @@
             }
         },
 
-        data () {
-            return {
-                dialog: false,
-                showErrorAlert: false,
-            }
-        },
-
         methods: {
             deletePublication() {
-                this.showErrorAlert = false;
+                let mainDialog = this.$refs['main-dialog'];
                 this.$store.dispatch('publications/delete', this.publication.id)
-                    .catch(() => this.showErrorAlert = true)
+                    .catch(() => mainDialog.showAlert())
             },
 
             ...mapGetters('authentication', [
                 'isAdmin'
             ]),
-
-            watch: {
-                dialog: function(val, oldVal) {
-                    if (val && !oldVal) {
-                        this.showErrorAlert = false;
-                    }
-                }
-            }
         }
     }
 </script>

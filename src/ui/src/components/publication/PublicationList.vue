@@ -26,7 +26,7 @@
             <p>Нет загруженных публикаций.</p>
         </template>
 
-        <PublicationAdd v-bind:disabled="loadingError"/>
+        <PublicationAdd/>
     </div>
 </template>
 
