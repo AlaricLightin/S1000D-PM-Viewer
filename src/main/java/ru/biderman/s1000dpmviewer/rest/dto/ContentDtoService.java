@@ -1,9 +1,8 @@
-package ru.biderman.s1000dpmviewer.rest;
+package ru.biderman.s1000dpmviewer.rest.dto;
 
 import org.springframework.stereotype.Service;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.DMRef;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
-import ru.biderman.s1000dpmviewer.rest.dto.ContentItem;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-class ContentDtoService {
+public class ContentDtoService {
     static String getDmNameString(DMRef dmRef) {
         String code = dmRef.getCode();
         if (!dmRef.getIssue().isEmpty() || !dmRef.getLanguage().isEmpty())
@@ -20,7 +19,7 @@ class ContentDtoService {
         return String.format("[%s] %s", code, dmRef.getTitle());
     }
 
-    List<ContentItem> createContentItems(Entry contentRootEntry) {
+    public List<ContentItem> createContentItems(Entry contentRootEntry) {
         return Collections.singletonList(createEntryContent(contentRootEntry));
     }
 

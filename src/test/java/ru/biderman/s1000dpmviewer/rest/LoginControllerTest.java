@@ -8,8 +8,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.biderman.s1000dpmviewer.domain.User;
-import ru.biderman.s1000dpmviewer.security.Authorities;
+import ru.biderman.s1000dpmviewer.domain.UserData;
+import ru.biderman.s1000dpmviewer.domain.UserRole;
 import ru.biderman.s1000dpmviewer.services.UserService;
 
 import java.util.Collections;
@@ -35,14 +35,14 @@ class LoginControllerTest {
     @Test
     @WithMockUser
     void shouldGetCurrentUser() throws Exception{
-        User user = new User("username", null, Collections.singleton(Authorities.EDITOR));
-        when(userService.getUserByUserDetails(any())).thenReturn(user);
+        UserData userData = new UserData("username", null, Collections.singleton(UserRole.EDITOR));
+        when(userService.getUserByUserDetails(any())).thenReturn(userData);
 
         mockMvc.perform(post("/login").with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value(user.getUsername()))
+                .andExpect(jsonPath("$.username").value(userData.getUsername()))
                 .andExpect(jsonPath("$.authorities").isArray())
-                .andExpect(jsonPath("$.authorities[0]").value(Authorities.EDITOR.toString()))
+                .andExpect(jsonPath("$.authorities[0]").value(UserRole.EDITOR.toString()))
                 .andReturn();
     }
 }

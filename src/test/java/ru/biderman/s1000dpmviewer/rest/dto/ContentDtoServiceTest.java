@@ -1,4 +1,4 @@
-package ru.biderman.s1000dpmviewer.rest;
+package ru.biderman.s1000dpmviewer.rest.dto;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -8,7 +8,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.DMRef;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Ident;
-import ru.biderman.s1000dpmviewer.rest.dto.ContentItem;
 
 import java.util.Arrays;
 import java.util.Collections;

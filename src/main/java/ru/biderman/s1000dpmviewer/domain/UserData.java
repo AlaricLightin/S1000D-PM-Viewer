@@ -1,15 +1,18 @@
 package ru.biderman.s1000dpmviewer.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import ru.biderman.s1000dpmviewer.security.Authorities;
+import lombok.Setter;
 
 import java.util.Set;
 
 @RequiredArgsConstructor
 @Getter
-public class User {
+@Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class UserData {
     private final String username;
     private final String password;
-    private final Set<Authorities> authorities;
+    private final Set<UserRole> authorities;
 }

@@ -11,12 +11,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ru.biderman.s1000dpmviewer.domain.Publication;
 import ru.biderman.s1000dpmviewer.domain.PublicationDetails;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
-import ru.biderman.s1000dpmviewer.exceptions.CustomBadRequestException;
 import ru.biderman.s1000dpmviewer.exceptions.InvalidPublicationException;
 import ru.biderman.s1000dpmviewer.exceptions.PublicationAlreadyExistsException;
 import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
+import ru.biderman.s1000dpmviewer.rest.dto.ContentDtoService;
 import ru.biderman.s1000dpmviewer.rest.dto.ContentItem;
-import ru.biderman.s1000dpmviewer.rest.dto.CustomExceptionDto;
 import ru.biderman.s1000dpmviewer.services.PublicationDetailsService;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
 
@@ -59,11 +58,5 @@ public class PublicationController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public void publicationNotFoundHandler() {
 
-    }
-
-    @ExceptionHandler(CustomBadRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public CustomExceptionDto badRequestExceptionHandler(CustomBadRequestException exception) {
-        return CustomExceptionDto.createFromException(exception);
     }
 }

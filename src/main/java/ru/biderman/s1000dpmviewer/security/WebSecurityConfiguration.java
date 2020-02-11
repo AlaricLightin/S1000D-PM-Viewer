@@ -3,26 +3,26 @@ package ru.biderman.s1000dpmviewer.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
+import ru.biderman.s1000dpmviewer.domain.UserRole;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 import java.io.IOException;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
-    private final DataSource dataSource;
+    private final JdbcUserDetailsManager jdbcUserDetailsManager;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -30,12 +30,14 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .csrf()
                     .disable()// TODO потом прикрутить обратно
                 .authorizeRequests()
+                    .antMatchers("/user", "/user/**")
+                    .hasRole(UserRole.ADMIN.toString())
                     .antMatchers(HttpMethod.DELETE, "/publication/*")
-                    .hasRole(Authorities.ADMIN.toString())
+                    .hasRole(UserRole.ADMIN.toString())
                 .and()
                 .authorizeRequests()
                     .antMatchers(HttpMethod.POST, "/publication")
-                    .hasRole(Authorities.EDITOR.toString())
+                    .hasRole(UserRole.EDITOR.toString())
                 .and()
                 .authorizeRequests()
                     .antMatchers(HttpMethod.GET,
@@ -51,12 +53,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
-    @Bean
     @Override
-    protected UserDetailsService userDetailsService() {
-        JdbcDaoImpl userDetailsService = new JdbcDaoImpl();
-        userDetailsService.setDataSource(dataSource);
-        return userDetailsService;
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(jdbcUserDetailsManager);
     }
 
     @Bean

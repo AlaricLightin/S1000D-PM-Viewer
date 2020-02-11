@@ -11,14 +11,15 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import ru.biderman.s1000dpmviewer.rest.dto.ContentDtoService;
 import ru.biderman.s1000dpmviewer.services.PublicationDetailsService;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
 
-import javax.sql.DataSource;
 import java.util.stream.Stream;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -30,7 +31,8 @@ import static ru.biderman.s1000dpmviewer.rest.ControllerTestUtils.createTestMult
 
 @WebMvcTest(PublicationController.class)
 @DisplayName("Проверка безопасности работы с публикациями ")
-public class SecurityTest {
+@Import(ControllerTestConfiguration.class)
+public class SecurityPublicationTest {
     @Autowired
     MockMvc mockMvc;
 
@@ -42,9 +44,6 @@ public class SecurityTest {
 
     @MockBean
     ContentDtoService contentDtoService;
-
-    @MockBean
-    DataSource dataSource;
 
     private static final long PUB_ID = 101;
 

@@ -21,10 +21,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ru.biderman.s1000dpmviewer.domain.Publication;
 import ru.biderman.s1000dpmviewer.domain.PublicationDetails;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
-import ru.biderman.s1000dpmviewer.exceptions.ErrorCodes;
-import ru.biderman.s1000dpmviewer.exceptions.InvalidPublicationException;
-import ru.biderman.s1000dpmviewer.exceptions.PublicationAlreadyExistsException;
-import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
+import ru.biderman.s1000dpmviewer.exceptions.*;
+import ru.biderman.s1000dpmviewer.rest.dto.ContentDtoService;
 import ru.biderman.s1000dpmviewer.rest.dto.ContentItem;
 import ru.biderman.s1000dpmviewer.services.PublicationDetailsService;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
@@ -128,7 +126,7 @@ class PublicationControllerTest {
     @ParameterizedTest
     @ArgumentsSource(AddErrorData.class)
     @WithMockEditor
-    void shouldSendBadRequestIfCouldNotAdd(Class<? extends Throwable> exceptionClass, int errorCode) throws Exception {
+    void shouldSendBadRequestIfCouldNotAdd(Class<CustomBadRequestException> exceptionClass, int errorCode) throws Exception {
         doThrow(exceptionClass).when(publicationService).add(any());
         MockMultipartFile multipartFile = createTestMultipartFile("Some content");
         mockMvc.perform(multipart("/publication").file(multipartFile).with(csrf()))
