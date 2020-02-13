@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.biderman.s1000dpmviewer.domain.UserData;
@@ -33,7 +34,8 @@ class UserServiceImplTest {
     void init() {
         userDao = mock(UserDao.class);
         jdbcUserDetailsManager = mock(JdbcUserDetailsManager.class);
-        userService = new UserServiceImpl(userDao, jdbcUserDetailsManager);
+        PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
+        userService = new UserServiceImpl(userDao, jdbcUserDetailsManager, passwordEncoder);
     }
 
     @DisplayName("должен возвращать всех")

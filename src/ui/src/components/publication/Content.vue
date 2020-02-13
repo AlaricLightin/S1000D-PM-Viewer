@@ -1,6 +1,6 @@
 <template>
     <div>
-        <LoadingErrorAlert v-if="loadingError"/>
+        <loading-error-alert v-if="loadingError"/>
 
         <v-treeview ref="treeView"
                     open-all

@@ -20,7 +20,7 @@
                 <v-card-actions>
                     <v-spacer>
                         <slot name="mainButton">
-                            <v-btn text @click="onButtonClick">{{mainButtonCaption}}</v-btn>
+                            <v-btn text @click="okButtonClick">{{mainButtonCaption}}</v-btn>
                         </slot>
                         <v-btn text @click="dialog = false">Отмена</v-btn>
                     </v-spacer>
@@ -48,7 +48,7 @@
         },
 
         methods: {
-            onButtonClick: function () {
+            okButtonClick: function () {
                 this.showErrorAlert = false;
                 this.$emit('ok-button-click');
             },

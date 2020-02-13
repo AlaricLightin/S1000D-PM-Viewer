@@ -8,6 +8,6 @@ public class InvalidUsernameException extends CustomBadRequestException {
 
     @Override
     public String getMessage() {
-        return "Invalid username";
+        return "Invalid username.";
     }
 }

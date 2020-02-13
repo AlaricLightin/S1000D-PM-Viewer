@@ -1,6 +1,6 @@
 <template>
     <div>
-        <LoadingErrorAlert v-if="loadingError"/>
+        <loading-error-alert v-if="loadingError"/>
 
         <v-list v-if="this.publications.length > 0">
             <v-list-item three-line
@@ -16,9 +16,13 @@
                 </v-list-item-content>
 
                 <v-list-item-action>
-                    <v-btn @click="$router.push({name: 'Content', params: {id: publication.id}})">Просмотр</v-btn>
+                    <v-btn :to="{name: 'Content', params: {id: publication.id}}">Просмотр</v-btn>
+                </v-list-item-action>
+                <v-list-item-action>
                     <v-btn>Права доступа</v-btn>
-                    <PublicationDelete :publication="publication"/>
+                </v-list-item-action>
+                <v-list-item-action>
+                    <publication-delete :publication="publication"/>
                 </v-list-item-action>
             </v-list-item>
         </v-list>
@@ -26,7 +30,7 @@
             <p>Нет загруженных публикаций.</p>
         </template>
 
-        <PublicationAdd/>
+        <publication-add/>
     </div>
 </template>
 

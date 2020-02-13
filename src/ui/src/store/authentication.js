@@ -1,5 +1,7 @@
 import axios from 'axios'
 
+const USER_PROPERTIES = 'pmViewerUser';
+
 const state = {
     user: null,
     userToken: null
@@ -70,13 +72,27 @@ const mutations = {
     }
 };
 
+// noinspection JSUnusedGlobalSymbols
 const actions = {
+    getFromStorage({commit}) {
+        let userObject = JSON.parse(localStorage.getItem(USER_PROPERTIES));
+        if (userObject) {
+            commit('SET_USER', userObject.user);
+            commit('SET_TOKEN', userObject.token);
+        }
+    },
+
     login({commit, getters}, payload) {
+        localStorage.removeItem(USER_PROPERTIES);
         commit('SET_USER', null);
-        commit('SET_TOKEN', btoa(payload.username + ':' + payload.password)); //TODO учесть ограничения на логин и пароль
+        let token = btoa(payload.username + ':' + payload.password);
+        commit('SET_TOKEN', token);
         return getters.getPostRequest('/login')
             .then(r => r.data)
-            .then(user => commit('SET_USER', user));
+            .then(user => {
+                commit('SET_USER', user);
+                localStorage.setItem(USER_PROPERTIES, JSON.stringify({user: user, token: token}));
+            });
     },
 
     logout({commit}) {

@@ -1,7 +1,7 @@
 <template>
     <custom-dialog v-if="isActive"
                    ref="main-dialog"
-                   max-width="300px"
+                   max-width="400px"
                    main-button-caption="Удалить"
                    form-caption="Удаление публикации"
                    v-on:ok-button-click="deletePublication"
