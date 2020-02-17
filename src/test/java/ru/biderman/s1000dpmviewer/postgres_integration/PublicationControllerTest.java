@@ -1,7 +1,6 @@
 package ru.biderman.s1000dpmviewer.postgres_integration;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,9 +14,11 @@ import ru.biderman.s1000dpmviewer.services.PublicationDetailsService;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
 import ru.biderman.s1000dpmviewer.testutils.TestConsts;
 import ru.biderman.s1000dpmviewer.testutils.TestUtils;
+import ru.biderman.s1000dpmviewer.testutils.WithMockAdmin;
 import ru.biderman.s1000dpmviewer.testutils.WithMockEditor;
 
 import java.io.FileInputStream;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,10 +35,9 @@ import static ru.biderman.s1000dpmviewer.testutils.TestConsts.*;
 @AutoConfigureMockMvc
 @DisplayName("Контроллер публикации при интеграционном тесте ")
 @ActiveProfiles("postgres-test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class PublicationControllerTest {
-    private static final long START_ID = 100;
-
     @Autowired
     MockMvc mockMvc;
 
@@ -47,6 +47,7 @@ public class PublicationControllerTest {
     @Autowired
     PublicationService publicationService;
 
+    @Order(0)
     @DisplayName("должен добавлять публикацию из файла")
     @Test
     @WithMockEditor
@@ -59,49 +60,61 @@ public class PublicationControllerTest {
                     .andExpect(status().isCreated())
                     .andReturn();
         }
+    }
 
-        Optional<PublicationDetails> details = detailsService.findById(START_ID);
+    @Order(1)
+    @DisplayName("должен проверять, что публикация записалась")
+    @Test
+    @WithMockAdmin
+    void shouldCheckPreviousWrite() {
+        Optional<PublicationDetails> details = detailsService.findById(START_PUBLICATION_ID);
         assertThat(details)
                 .isPresent();
 
         assertThat(details.get())
-                .hasFieldOrPropertyWithValue("id", START_ID)
+                .hasFieldOrPropertyWithValue("id", START_PUBLICATION_ID)
                 .hasFieldOrPropertyWithValue("code", TEST_PUBLICATION_CODE)
                 .hasFieldOrPropertyWithValue("issue", TEST_PUBLICATION_ISSUE)
                 .hasFieldOrPropertyWithValue("language", TEST_PUBLICATION_LANGUAGE)
                 .hasFieldOrPropertyWithValue("title", TEST_PUBLICATION_TITLE);
     }
 
-    private void addTestPublication() throws Exception {
-        try (
-                FileInputStream fileInputStream = new FileInputStream(TestUtils.getDataFile(TestConsts.TEST_PUBLICATION_FILENAME))
-        ) {
-            publicationService.add(fileInputStream);
-        }
-    }
-
-    @DisplayName("должен проверять перечень публикаций")
+    @Order(2)
+    @DisplayName("должен проверять перечень публикаций (с проверкой безопасности)")
     @Test
     void shouldGetPublications() throws Exception {
-        addTestPublication();
-
         mockMvc.perform(get("/publication").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$", hasSize(0)))
+                .andReturn();
+
+        mockMvc.perform(get("/publication")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", getAdminAuthorizationHeader())
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(START_ID))
+                .andExpect(jsonPath("$[0].id").value(START_PUBLICATION_ID))
                 .andExpect(jsonPath("$[0].code").value(TEST_PUBLICATION_CODE))
                 .andExpect(jsonPath("$[0].issue").value(TEST_PUBLICATION_ISSUE))
                 .andExpect(jsonPath("$[0].language").value(TEST_PUBLICATION_LANGUAGE))
                 .andReturn();
     }
 
-    @DisplayName("должен возвращать контент")
+    @Order(3)
+    @DisplayName("должен возвращать контент (с проверкой безопасности)")
     @Test
     void shouldGetContent() throws Exception {
-        addTestPublication();
+        mockMvc.perform(get("/publication/{id}/content", START_PUBLICATION_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
 
-        mockMvc.perform(get("/publication/{id}/content", START_ID).accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/publication/{id}/content", START_PUBLICATION_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", getAdminAuthorizationHeader())
+        )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -111,19 +124,30 @@ public class PublicationControllerTest {
                 .andReturn();
     }
 
+    @Order(4)
     @DisplayName("должен удалять публикацию (с проверкой безопасности)")
     @Test
     void shouldDeletePublication() throws Exception {
-        addTestPublication();
+        mockMvc.perform(delete("/publication/{id}", START_PUBLICATION_ID)
+                        .with(csrf())
+        )
+                .andExpect(status().isUnauthorized())
+                .andReturn();
 
-        mockMvc.perform(delete("/publication/{id}", START_ID)
+        mockMvc.perform(delete("/publication/{id}", START_PUBLICATION_ID)
                 .with(csrf())
                 .header("Authorization", getAdminAuthorizationHeader())
         )
                 .andExpect(status().isOk())
                 .andReturn();
+    }
 
-        Optional<PublicationDetails> details = detailsService.findById(START_ID);
+    @Order(5)
+    @DisplayName("должен проверять, что после удаления ничего не осталось")
+    @WithMockAdmin
+    @Test
+    void shouldCheckIfDeletingSucceeded() {
+        List<PublicationDetails> details = detailsService.findAll();
         assertThat(details)
                 .isEmpty();
     }

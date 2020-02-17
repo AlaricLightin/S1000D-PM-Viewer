@@ -30,6 +30,7 @@ class PublicationServiceImplTest {
     private PublicationRepository publicationRepository;
     private PublicationParser publicationParser;
     private PublicationDetailsRepository detailsRepository;
+    private AuthorizationService authorizationService;
 
     private final static long PUBLICATION_ID = 101;
 
@@ -53,7 +54,9 @@ class PublicationServiceImplTest {
         publicationRepository = mock(PublicationRepository.class);
         publicationParser = mock(PublicationParser.class);
         detailsRepository = mock(PublicationDetailsRepository.class);
-        publicationService = new PublicationServiceImpl(publicationRepository, detailsRepository, publicationParser);
+        authorizationService = mock(AuthorizationService.class);
+        publicationService = new PublicationServiceImpl(publicationRepository,
+                detailsRepository, publicationParser, authorizationService);
     }
 
     @DisplayName("должен добавлять публикацию")
@@ -62,6 +65,7 @@ class PublicationServiceImplTest {
         InputStream inputStream = mock(InputStream.class);
         Publication publication = createMockPublication();
         Publication expectedSavedPublication = mock(Publication.class);
+        when(expectedSavedPublication.getId()).thenReturn(PUBLICATION_ID);
         when(publicationParser.createPublication(inputStream)).thenReturn(publication);
         when(detailsRepository.existsByCodeAndIssueAndLanguage(
                 MOCK_PUBLICATION_CODE, MOCK_PUBLICATION_ISSUE, MOCK_PUBLICATION_LANGUAGE)).thenReturn(false);
@@ -69,6 +73,7 @@ class PublicationServiceImplTest {
 
         Publication savedPublication = publicationService.add(inputStream);
         assertThat(savedPublication).isEqualTo(expectedSavedPublication);
+        verify(authorizationService).createAdminRights(PUBLICATION_ID);
     }
 
     @DisplayName("должен бросать исключение, если не удалось распарсить публикацию")

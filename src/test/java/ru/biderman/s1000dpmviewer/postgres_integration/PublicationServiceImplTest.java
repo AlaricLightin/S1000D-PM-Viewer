@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import ru.biderman.s1000dpmviewer.domain.Publication;
 import ru.biderman.s1000dpmviewer.services.PublicationService;
 import ru.biderman.s1000dpmviewer.testutils.TestConsts;
+import ru.biderman.s1000dpmviewer.testutils.WithMockEditor;
 
 import java.io.FileInputStream;
 
@@ -26,6 +27,7 @@ class PublicationServiceImplTest {
 
     @DisplayName("должен создавать публикацию")
     @Test
+    @WithMockEditor
     void shouldCreatePublication() throws Exception{
         try(
                 FileInputStream fileInputStream = new FileInputStream(getDataFile(TestConsts.TEST_PUBLICATION_FILENAME))

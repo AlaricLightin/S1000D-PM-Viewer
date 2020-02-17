@@ -1,7 +1,6 @@
 package ru.biderman.s1000dpmviewer.rest;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,11 +51,5 @@ public class PublicationController {
     public List<ContentItem> getContent(@PathVariable("id") long id) throws PublicationNotFoundException {
         Entry rootEntry = publicationService.getContentById(id);
         return contentDtoService.createContentItems(rootEntry);
-    }
-
-    @ExceptionHandler(PublicationNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public void publicationNotFoundHandler() {
-
     }
 }

@@ -21,14 +21,18 @@ public class PublicationServiceImpl implements PublicationService {
     private final PublicationRepository publicationRepository;
     private final PublicationDetailsRepository detailsRepository;
     private final PublicationParser parser;
+    private final AuthorizationService authorizationService;
 
     @Override
     @Transactional
     public Publication add(InputStream inputStream) throws InvalidPublicationException, PublicationAlreadyExistsException {
         Publication newPublication = parser.createPublication(inputStream);
         PublicationDetails details = newPublication.getDetails();
-        if (!detailsRepository.existsByCodeAndIssueAndLanguage(details.getCode(), details.getIssue(), details.getLanguage()))
-            return publicationRepository.save(newPublication);
+        if (!detailsRepository.existsByCodeAndIssueAndLanguage(details.getCode(), details.getIssue(), details.getLanguage())) {
+            Publication savedPublication = publicationRepository.save(newPublication);
+            authorizationService.createAdminRights(savedPublication.getId());
+            return savedPublication;
+        }
         else
             throw new PublicationAlreadyExistsException();
     }

@@ -14,4 +14,5 @@ public class TestConsts {
 
     public static final String TEST_DM_CODE = "TEST1-A-111-11-11-11A-110A-A";
 
+    public static final long START_PUBLICATION_ID = 100;
 }

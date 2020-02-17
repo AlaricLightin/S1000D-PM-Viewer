@@ -5,6 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -13,12 +17,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.biderman.s1000dpmviewer.testutils.SecurityTestUtils.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {"spring.main.allow-bean-definition-overriding=true"})
 @AutoConfigureMockMvc
 @DisplayName("Контроллер логина при интеграционном тесте ")
 public class LoginControllerIntegrationTest {
     @Autowired
     MockMvc mockMvc;
+
+    @TestConfiguration
+    static class TestConfig{
+        @Primary
+        @Bean
+        public EhCacheManagerFactoryBean aclCacheManager() {
+            EhCacheManagerFactoryBean factoryBean = new EhCacheManagerFactoryBean();
+            factoryBean.setShared(false);
+            factoryBean.setAcceptExisting(true);
+            return factoryBean;
+        }
+    }
 
     @DisplayName("должен возвращать текущего пользователя при правильной аутентификации")
     @Test

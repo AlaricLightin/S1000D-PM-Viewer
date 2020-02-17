@@ -7,5 +7,5 @@ create table publication_details(
     issue_date timestamp not null,
     load_datetime timestamp with time zone,
     constraint unique_uk_pub_details unique(code, issue, language),
-    constraint foreign_fk_1 foreign key(id) references publications(id)
+    constraint foreign_fk_publication foreign key(id) references publications(id)
 );

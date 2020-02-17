@@ -34,6 +34,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .hasRole(UserRole.ADMIN.toString())
                     .antMatchers(HttpMethod.DELETE, "/publication/*")
                     .hasRole(UserRole.ADMIN.toString())
+                    .antMatchers("/publication/*/authorizations")
+                    .hasRole(UserRole.ADMIN.toString())
                 .and()
                 .authorizeRequests()
                     .antMatchers(HttpMethod.POST, "/publication")

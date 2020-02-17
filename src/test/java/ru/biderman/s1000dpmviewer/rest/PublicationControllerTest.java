@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.biderman.s1000dpmviewer.domain.Publication;
@@ -90,9 +91,11 @@ class PublicationControllerTest {
                 .andReturn();
     }
 
+    private static final String EDITOR_USERNAME = "editor";
+
     @DisplayName("должен загружать файл с новой публикацией")
     @Test
-    @WithMockEditor
+    @WithMockUser(username = EDITOR_USERNAME, roles = "EDITOR")
     void shouldLoadPublicationFile() throws Exception {
         final String content = "Test stream";
         MockMultipartFile multipartFile = createTestMultipartFile(content);
@@ -117,9 +120,9 @@ class PublicationControllerTest {
                 .andExpect(jsonPath("$.code").value(PUB_CODE))
                 .andReturn();
 
-        ArgumentCaptor<InputStream> argumentCaptor = ArgumentCaptor.forClass(InputStream.class);
-        verify(publicationService).add(argumentCaptor.capture());
-        assertThat(IOUtils.toString(argumentCaptor.getValue(), StandardCharsets.UTF_8)).isEqualTo(content);
+        ArgumentCaptor<InputStream> streamCaptor = ArgumentCaptor.forClass(InputStream.class);
+        verify(publicationService).add(streamCaptor.capture());
+        assertThat(IOUtils.toString(streamCaptor.getValue(), StandardCharsets.UTF_8)).isEqualTo(content);
     }
 
     @DisplayName("должен сообщать об ошибке, если при добавлении случилась ошибка")
