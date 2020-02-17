@@ -10,7 +10,6 @@
 </template>
 
 <script>
-    import axios from "axios";
     import LoadingErrorAlert from "../errors/LoadingErrorAlert";
 
     export default {
@@ -31,8 +30,7 @@
 
         methods: {
             loadContent() {
-                axios
-                    .get(`/publication/${this.$route.params.id}/content`)
+                this.$store.getters['authentication/getGetRequest'](`/publication/${this.$route.params.id}/content`)
                     .then(r => {
                         this.items = r.data;
                         this.$refs["treeView"].updateAll(true);

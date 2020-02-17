@@ -97,6 +97,7 @@ const actions = {
 
     logout({commit}) {
         commit('LOGOUT');
+        localStorage.removeItem(USER_PROPERTIES);
     }
 };
 

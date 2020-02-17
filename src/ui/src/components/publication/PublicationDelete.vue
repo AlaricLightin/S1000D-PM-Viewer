@@ -1,5 +1,5 @@
 <template>
-    <custom-dialog v-if="isActive"
+    <custom-dialog v-if="isAdmin"
                    ref="main-dialog"
                    max-width="400px"
                    main-button-caption="Удалить"
@@ -23,9 +23,9 @@
         },
 
         computed: {
-            isActive: function () {
-                return this.isAdmin();
-            }
+            ...mapGetters('authentication', [
+                'isAdmin'
+            ]),
         },
 
         methods: {
@@ -34,10 +34,6 @@
                 this.$store.dispatch('publications/delete', this.publication.id)
                     .catch(() => mainDialog.showAlert())
             },
-
-            ...mapGetters('authentication', [
-                'isAdmin'
-            ]),
         }
     }
 </script>

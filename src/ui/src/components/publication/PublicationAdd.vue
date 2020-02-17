@@ -1,5 +1,5 @@
 <template>
-    <custom-dialog v-if="isActive"
+    <custom-dialog v-if="isEditor"
                    ref="main-dialog"
                    max-width="800px"
                    main-button-caption="Загрузить"
@@ -45,9 +45,9 @@
                 return !this.file || this.loading;
             },
 
-            isActive: function () {
-                return this.isEditor();
-            },
+            ...mapGetters('authentication', [
+                'isEditor'
+            ]),
         },
 
         methods: {
@@ -78,10 +78,6 @@
                 this.loading = false;
                 this.file = null;
             },
-
-            ...mapGetters('authentication', [
-                'isEditor'
-            ])
         },
     }
 </script>

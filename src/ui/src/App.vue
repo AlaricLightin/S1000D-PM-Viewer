@@ -10,7 +10,7 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-list-item v-if="this.isAdmin()" link to="/users">
+        <v-list-item v-if="isAdmin" link to="/users">
           <v-list-item-content>
             <v-list-item-title>
               Пользователи
@@ -50,13 +50,13 @@
       //
     }),
 
-    methods: {
+    computed: {
       ...mapGetters('authentication', [
         'isAdmin'
       ])
     },
 
-    mounted() {
+    created() {
       this.$store.dispatch('authentication/getFromStorage');
     }
   };
