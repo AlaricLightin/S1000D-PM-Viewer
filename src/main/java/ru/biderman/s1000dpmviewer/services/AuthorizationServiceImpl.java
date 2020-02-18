@@ -109,6 +109,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         mutableAclService.updateAcl(publicationAcl);
 
         publicationAcl.insertAce(0, BasePermission.READ, ROLE_ADMIN, true);
+        publicationAcl.insertAce(1, BasePermission.READ, owner, true);
         mutableAclService.updateAcl(publicationAcl);
 
         MutableAcl detailsAcl = mutableAclService.createAcl(detailsIdentity);

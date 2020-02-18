@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.acls.domain.EhCacheBasedAclCache;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
@@ -15,7 +16,6 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.biderman.s1000dpmviewer.domain.Publication;
-import ru.biderman.s1000dpmviewer.domain.PublicationDetails;
 import ru.biderman.s1000dpmviewer.domain.PublicationViewAuthorizations;
 import ru.biderman.s1000dpmviewer.exceptions.PublicationNotFoundException;
 import ru.biderman.s1000dpmviewer.testutils.TestConsts;
@@ -25,7 +25,6 @@ import ru.biderman.s1000dpmviewer.testutils.WithMockEditor;
 import javax.sql.DataSource;
 import java.io.FileInputStream;
 import java.util.Collections;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -66,6 +65,17 @@ public class AuthorizationServiceIntegrationTest {
         }
     }
 
+    private void isVisible() throws PublicationNotFoundException {
+        assertThat(detailsService.findAll()).hasSize(1);
+        assertThat(publicationService.findById(START_PUBLICATION_ID)).isNotNull();
+    }
+
+    private void isNotVisible() {
+        assertThat(detailsService.findAll()).hasSize(0);
+        assertThrows(AccessDeniedException.class, () -> publicationService.findById(START_PUBLICATION_ID));
+    }
+
+
     @Order(0)
     @DisplayName("должен создавать публикацию")
     @Test
@@ -76,31 +86,35 @@ public class AuthorizationServiceIntegrationTest {
         ) {
             Publication publication = publicationService.add(fileInputStream);
             assertThat(publication)
-                    .satisfies(p -> assertThat(p.getId()).isGreaterThan(0));
+                    .satisfies(p -> assertThat(p.getId()).isEqualTo(START_PUBLICATION_ID));
         }
     }
 
-    @Order(1)
+    @Order(5)
+    @DisplayName("должен показывать созданную публикацию её создателю")
+    @Test
+    @WithMockEditor
+    void shouldShowPublicationToCreator() throws PublicationNotFoundException {
+        isVisible();
+    }
+
+    @Order(10)
     @DisplayName("должен показывать созданную публикацию админу")
     @Test
     @WithMockAdmin
-    void shouldShowPublicationToAdmin() {
-        List<PublicationDetails> detailsList = detailsService.findAll();
-        assertThat(detailsList)
-                .hasSize(1);
+    void shouldShowPublicationToAdmin() throws PublicationNotFoundException {
+        isVisible();
     }
 
-    @Order(2)
+    @Order(20)
     @DisplayName("не должен показывать созданную публикацию обычному пользователю")
     @Test
     @WithMockUser
     void shouldNotShowToSimpleUser() {
-        List<PublicationDetails> detailsList = detailsService.findAll();
-        assertThat(detailsList)
-                .hasSize(0);
+        isNotVisible();
     }
 
-    @Order(3)
+    @Order(30)
     @DisplayName("не должен позволять менять права обычному пользователю")
     @Test
     @WithMockUser
@@ -109,7 +123,7 @@ public class AuthorizationServiceIntegrationTest {
                 () -> authorizationService.setViewAuthorizations(START_PUBLICATION_ID, PublicationViewAuthorizations.createForAll()));
     }
 
-    @Order(4)
+    @Order(40)
     @DisplayName("должен менять права на просмотр для всех")
     @Test
     @WithMockAdmin
@@ -117,27 +131,23 @@ public class AuthorizationServiceIntegrationTest {
         authorizationService.setViewAuthorizations(START_PUBLICATION_ID, PublicationViewAuthorizations.createForAll());
     }
 
-    @Order(5)
+    @Order(50)
     @DisplayName("должен показывать публикацию анонимному пользователю")
     @Test
     @WithAnonymousUser
-    void shouldShowToAnonymous() {
-        List<PublicationDetails> detailsList = detailsService.findAll();
-        assertThat(detailsList)
-                .hasSize(1);
+    void shouldShowToAnonymous() throws PublicationNotFoundException{
+        isVisible();
     }
 
-    @Order(6)
+    @Order(60)
     @DisplayName("должен показывать публикацию обычному пользователю")
     @Test
     @WithMockUser
-    void shouldShowToSimpleUser() {
-        List<PublicationDetails> detailsList = detailsService.findAll();
-        assertThat(detailsList)
-                .hasSize(1);
+    void shouldShowToSimpleUser() throws PublicationNotFoundException{
+        isVisible();
     }
 
-    @Order(7)
+    @Order(70)
     @DisplayName("должен считывать права для всех")
     @Test
     @WithMockAdmin
@@ -149,7 +159,7 @@ public class AuthorizationServiceIntegrationTest {
                 .isEqualTo(0);
     }
 
-    @Order(8)
+    @Order(80)
     @DisplayName("должен назначать права для просмотра отдельному пользователю")
     @Test
     @WithMockAdmin
@@ -159,37 +169,31 @@ public class AuthorizationServiceIntegrationTest {
                     Collections.singletonList(USER_WITH_VIEW_AUTHORIZATION)));
     }
 
-    @Order(9)
+    @Order(90)
     @DisplayName("должен показывать публикацию пользователю, получившему права")
     @Test
     @WithMockUser(username = USER_WITH_VIEW_AUTHORIZATION)
-    void shouldShowToUserWithAuthorization() {
-        List<PublicationDetails> detailsList = detailsService.findAll();
-        assertThat(detailsList)
-                .hasSize(1);
+    void shouldShowToUserWithAuthorization() throws PublicationNotFoundException{
+        isVisible();
     }
 
-    @Order(10)
+    @Order(100)
     @DisplayName("должен не показывать публикацию пользователю без прав")
     @Test
     @WithMockUser
     void shouldNotShowToUserWithoutAuthorization() {
-        List<PublicationDetails> detailsList = detailsService.findAll();
-        assertThat(detailsList)
-                .hasSize(0);
+        isNotVisible();
     }
 
-    @Order(11)
+    @Order(110)
     @DisplayName("должен не показывать публикацию анонимному пользователю")
     @Test
     @WithAnonymousUser
     void shouldNotShowToAnonymousUser() {
-        List<PublicationDetails> detailsList = detailsService.findAll();
-        assertThat(detailsList)
-                .hasSize(0);
+        isNotVisible();
     }
 
-    @Order(12)
+    @Order(120)
     @DisplayName("должен считывать права для пользователей")
     @Test
     @WithMockAdmin
@@ -200,7 +204,7 @@ public class AuthorizationServiceIntegrationTest {
                 .satisfies(a -> assertThat(a.getUsernameList()).containsExactly(USER_WITH_VIEW_AUTHORIZATION));
     }
 
-    @Order(50)
+    @Order(500)
     @DisplayName("должен выбрасывать исключение, если публикации нет")
     @Test
     @WithMockAdmin
@@ -209,7 +213,7 @@ public class AuthorizationServiceIntegrationTest {
                 () -> authorizationService.getViewAuthorizations(START_PUBLICATION_ID + 1));
     }
 
-    @Order(51)
+    @Order(510)
     @DisplayName("должен выбрасывать исключение при сохранении, если публикации нет")
     @Test
     @WithMockAdmin

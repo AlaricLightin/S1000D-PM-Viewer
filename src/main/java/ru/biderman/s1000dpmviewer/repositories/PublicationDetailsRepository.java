@@ -14,6 +14,6 @@ public interface PublicationDetailsRepository extends JpaRepository<PublicationD
     @PostFilter("hasPermission(filterObject, 'READ')")
     List<PublicationDetails> findAll();
 
-    @PostAuthorize("hasPermission(returnObject.orElse(null), 'READ')")
+    @PostAuthorize("!returnObject.present || hasPermission(returnObject.get(), 'READ')")
     Optional<PublicationDetails> findById(Long id);
 }
