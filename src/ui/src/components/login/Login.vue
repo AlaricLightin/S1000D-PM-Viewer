@@ -84,10 +84,12 @@
             logoutClick() {
                 // noinspection JSValidateTypes
                 this.logout();
+                this.$router.push('/');
             },
 
             setStartState() {
-                this.$refs["form"].reset();
+                if(this.$refs["form"])
+                    this.$refs["form"].reset();
             }
         }
     }
