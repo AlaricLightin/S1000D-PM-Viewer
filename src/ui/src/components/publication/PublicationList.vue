@@ -19,7 +19,7 @@
                     <v-btn :to="{name: 'Content', params: {id: publication.id}}">Просмотр</v-btn>
                 </v-list-item-action>
                 <v-list-item-action>
-                    <v-btn>Права доступа</v-btn>
+                    <publication-authorizations :publication="publication"/>
                 </v-list-item-action>
                 <v-list-item-action>
                     <publication-delete :publication="publication"/>
@@ -40,10 +40,11 @@
     import PublicationDelete from "./PublicationDelete";
     import PublicationAdd from "./PublicationAdd";
     import LoadingErrorAlert from "../errors/LoadingErrorAlert";
+    import PublicationAuthorizations from "./PublicationAuthorizations";
 
     export default {
         name: "PublicationList",
-        components: {LoadingErrorAlert, PublicationDelete, PublicationAdd},
+        components: {PublicationAuthorizations, LoadingErrorAlert, PublicationDelete, PublicationAdd},
         computed: {
             ...mapState({
                 publications: state => state.publications.all,

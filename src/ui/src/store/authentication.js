@@ -34,6 +34,17 @@ const getters = {
                 getConfigWithAuthenticationHeaders(config, state.userToken));
     },
 
+    getPutRequest: (state) => (requestString, data, config) => {
+        if(!data)
+            data = {};
+
+        return axios
+            .put(
+                requestString,
+                data,
+                getConfigWithAuthenticationHeaders(config, state.userToken));
+    },
+
     getGetRequest: (state) => (requestString, config) => {
         return axios
             .get(

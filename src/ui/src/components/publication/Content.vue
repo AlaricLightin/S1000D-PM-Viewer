@@ -30,6 +30,7 @@
 
         methods: {
             loadContent() {
+                this.loadingError = false;
                 this.$store.getters['authentication/getGetRequest'](`/publication/${this.$route.params.id}/content`)
                     .then(r => {
                         this.items = r.data;
