@@ -1,5 +1,6 @@
 const state = {
-    all: []
+    all: [],
+    needToReload: false
 };
 
 const getters = {
@@ -11,6 +12,7 @@ const getters = {
 const mutations = {
     SET_PUBLICATIONS (state, publications) {
         state.all = publications;
+        state.needToReload = false;
     },
 
     ADD_PUBLICATION (state, publication) {
@@ -20,6 +22,10 @@ const mutations = {
     DELETE_PUBLICATION(state, idx) {
         state.all.splice(idx, 1);
     },
+
+    SET_NEED_TO_RELOAD(state) {
+        state.needToReload = true;
+    }
 };
 
 const actions = {

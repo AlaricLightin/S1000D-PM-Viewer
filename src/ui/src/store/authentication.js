@@ -91,12 +91,14 @@ const actions = {
             .then(r => r.data)
             .then(user => {
                 commit('SET_USER', user);
+                commit('publications/SET_NEED_TO_RELOAD', null, {root: true});
                 localStorage.setItem(USER_PROPERTIES, JSON.stringify({user: user, token: token}));
             });
     },
 
     logout({commit}) {
         commit('LOGOUT');
+        commit('publications/SET_NEED_TO_RELOAD', null, {root: true});
         localStorage.removeItem(USER_PROPERTIES);
     }
 };

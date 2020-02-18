@@ -46,7 +46,8 @@
         components: {LoadingErrorAlert, PublicationDelete, PublicationAdd},
         computed: {
             ...mapState({
-                publications: state => state.publications.all
+                publications: state => state.publications.all,
+                needToReload: state => state.publications.needToReload
             })
         },
 
@@ -55,8 +56,7 @@
         }),
 
         mounted() {
-            this.$store.dispatch('publications/load')
-                .catch(() => this.loadingError = true);
+            this.loadAll();
         },
 
         methods: {
@@ -69,6 +69,18 @@
                 let d = new Date(s);
                 return d.toLocaleDateString("ru-RU",
                     {year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric"});
+            },
+
+            loadAll() {
+                this.$store.dispatch('publications/load')
+                    .catch(() => this.loadingError = true);
+            }
+        },
+
+        watch: {
+            needToReload: function (val) {
+                if(val)
+                    this.loadAll();
             }
         }
     }
