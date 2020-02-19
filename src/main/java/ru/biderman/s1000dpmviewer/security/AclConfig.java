@@ -39,7 +39,10 @@ public class AclConfig {
 
     @Bean
     public EhCacheManagerFactoryBean aclCacheManager() {
-        return new EhCacheManagerFactoryBean();
+        EhCacheManagerFactoryBean factoryBean = new EhCacheManagerFactoryBean();
+        factoryBean.setShared(false);
+        factoryBean.setAcceptExisting(true);
+        return factoryBean;
     }
 
     @Bean

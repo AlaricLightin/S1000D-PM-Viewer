@@ -4,7 +4,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.access.AccessDeniedException;
@@ -49,15 +48,6 @@ public class AuthorizationServiceIntegrationTest {
 
     @TestConfiguration
     static class TestConfig {
-        @Primary
-        @Bean
-        public EhCacheManagerFactoryBean aclCacheManager() {
-            EhCacheManagerFactoryBean factoryBean = new EhCacheManagerFactoryBean();
-            factoryBean.setShared(false);
-            factoryBean.setAcceptExisting(true);
-            return factoryBean;
-        }
-
         @Primary
         @Bean
         public JdbcMutableAclService aclService(DataSource dataSource, LookupStrategy lookupStrategy, EhCacheBasedAclCache aclCache) {

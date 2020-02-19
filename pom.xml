@@ -94,6 +94,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sun.xml.security</groupId>
+            <artifactId>xml-security-impl</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -160,6 +165,7 @@
                                     <includes>
                                         <include>css/</include>
                                         <include>js/</include>
+                                        <include>fonts/</include>
                                         <include>index.html</include>
                                         <include>favicon.ico</include>
                                     </includes>
