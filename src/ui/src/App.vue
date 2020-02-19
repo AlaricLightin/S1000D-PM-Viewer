@@ -35,8 +35,6 @@
 </template>
 
 <script>
-  // TODO решить проблему с перезагрузкой перечня публикаций и пользователей при смене логина
-
   // TODO настроить, чтобы нельзя было перейти к списку users вручную
   // https://router.vuejs.org/guide/advanced/navigation-guards.html
 

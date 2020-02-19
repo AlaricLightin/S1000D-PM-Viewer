@@ -12,7 +12,7 @@
                 <v-row>
                     <v-text-field v-model="username"
                                   label="Имя пользователя"
-                                  :rules="nameRules"
+                                  :rules="getNameRules"
                                   required/>
                 </v-row>
                 <v-row>
@@ -48,6 +48,7 @@
 <script>
     import CustomDialog from "../customcomponents/CustomDialog";
     import {validationNameRules, validationPasswordRules} from "../../utils/ValidatorUtils";
+    import {mapGetters} from "vuex";
 
     export default {
         name: "UserAdd",
@@ -64,7 +65,6 @@
 
                 loading: false,
 
-                nameRules: validationNameRules(),
                 passwordRules: validationPasswordRules(),
 
                 password2rules: [
@@ -74,6 +74,19 @@
         },
 
         computed: {
+            ...mapGetters('users', [
+                'isUsernameExists'
+            ]),
+
+            getNameRules: function () {
+                let nameRules = validationNameRules();
+                let usernameExists = this.isUsernameExists;
+                // noinspection JSValidateTypes
+                nameRules.push(
+                    v => !usernameExists(v) || 'Пользователь с таким именем уже существует.'
+                );
+                return nameRules;
+            },
         },
 
         methods: {
@@ -99,23 +112,10 @@
             },
 
             setStartState: function () {
-                this.$refs["form"].reset();
+                if(this.$refs["form"])
+                    this.$refs["form"].reset();
                 this.loading = false;
             },
-
-            // TODO сделать проверку, что такого пользователя нет
-            // getNameRules: function () {
-            //     let nameRules = validationNameRules();
-            //     let usernameExists = this.isUsernameExists;
-            //     nameRules.push(
-            //         v => !usernameExists(v) || 'Пользователь с таким именем уже существует.'
-            //     );
-            //     return nameRules;
-            // },
-
-            // ...mapGetters('users', [
-            //     'isUsernameExists'
-            // ])
         }
     }
 </script>

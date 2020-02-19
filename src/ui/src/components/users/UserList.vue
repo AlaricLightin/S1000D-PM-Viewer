@@ -1,5 +1,6 @@
 <template>
     <div>
+        <v-progress-linear v-if="loading" indeterminate/>
         <loading-error-alert v-if="loadingError"/>
 
         <v-list>
@@ -20,7 +21,6 @@
 </template>
 
 <script>
-    // TODO сортировка пользователей по алфавиту
     import LoadingErrorAlert from "../errors/LoadingErrorAlert";
     import {mapState} from "vuex";
     import UserAdd from "./UserAdd";
@@ -37,12 +37,15 @@
         },
 
         data: () => ({
-            loadingError: false
+            loadingError: false,
+            loading: false
         }),
 
         mounted() {
+            this.loading = true;
             this.$store.dispatch('users/load')
-                .catch(() => this.loadingError = true);
+                .catch(() => this.loadingError = true)
+                .finally(() => this.loading = false);
         },
 
         methods: {

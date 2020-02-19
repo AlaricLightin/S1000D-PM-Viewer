@@ -1,5 +1,6 @@
 <template>
     <div>
+        <v-progress-linear v-if="loading" indeterminate/>
         <loading-error-alert v-if="loadingError"/>
 
         <v-list v-if="publicationTree.length > 0">
@@ -76,7 +77,8 @@
         },
 
         data: () => ({
-            loadingError: false
+            loadingError: false,
+            loading: false
         }),
 
         mounted() {
@@ -96,8 +98,10 @@
             },
 
             loadAll() {
+                this.loading = true;
                 this.$store.dispatch('publications/load')
-                    .catch(() => this.loadingError = true);
+                    .catch(() => this.loadingError = true)
+                    .finally(() => this.loading = false);
             }
         },
 

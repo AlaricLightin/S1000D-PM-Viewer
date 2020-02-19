@@ -6,15 +6,28 @@ const getters = {
     getIdx: (state) => (username) => {
         return state.all.findIndex(user => user.username === username);
     },
+
+    isUsernameExists: (state) => (username) => {
+        return state.all.some(user => user.username === username);
+    }
+};
+
+const userSortFunction = function (user1, user2) {
+    const u1 = user1.username;
+    const u2 = user2.username;
+    if(u1 < u2) return -1;
+    if(u1 > u2) return 1;
+    return 0;
 };
 
 const mutations = {
     SET_USERS (state, users) {
-        state.all = users;
+        state.all = users.sort(userSortFunction);
     },
 
     ADD_USER (state, user) {
         state.all.push(user);
+        state.all = state.all.sort(userSortFunction);
     },
 
     DELETE_USER(state, idx) {
