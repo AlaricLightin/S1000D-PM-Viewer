@@ -1,5 +1,6 @@
 <template>
     <div>
+        <v-progress-linear v-if="loading" indeterminate/>
         <loading-error-alert v-if="loadingError"/>
 
         <v-treeview ref="treeView"
@@ -17,12 +18,9 @@
         components: {LoadingErrorAlert},
         data: () => ({
             items: [],
-            loadingError: false
+            loadingError: false,
+            loading: false
         }),
-
-        // watch: {
-        //     '$route': 'loadContent',
-        // },
 
         mounted() {
             this.loadContent();
@@ -31,12 +29,14 @@
         methods: {
             loadContent() {
                 this.loadingError = false;
+                this.loading = true;
                 this.$store.getters['authentication/getGetRequest'](`/publication/${this.$route.params.id}/content`)
                     .then(r => {
                         this.items = r.data;
                         this.$refs["treeView"].updateAll(true);
                     })
-                    .catch(() => this.loadingError = true);
+                    .catch(() => this.loadingError = true)
+                    .finally(() => this.loading = false);
             }
         }
     }
