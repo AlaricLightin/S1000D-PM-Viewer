@@ -21,3 +21,22 @@ spring:
     multipart:
       enabled: true
       location: ${java.io.tmpdir}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,logfile
+
+  endpoint:
+    logfile:
+      enabled: true
+
+    health:
+      show-details: when_authorized
+      show-components: when_authorized
+      roles: ADMIN
+
+logging:
+  file:
+    path: logs
