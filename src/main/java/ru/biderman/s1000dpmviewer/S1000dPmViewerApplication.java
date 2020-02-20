@@ -12,8 +12,6 @@ public class S1000dPmViewerApplication {
 
 }
 
-// TODO не забыть про csrf
-
 // TODO дополнительное поле: кто добавил публикацию
 
 // TODO разобраться, нельзя ли сделать в Publication поле типа XML (Document)

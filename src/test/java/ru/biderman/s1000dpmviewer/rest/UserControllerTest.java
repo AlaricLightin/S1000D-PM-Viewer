@@ -136,7 +136,7 @@ class UserControllerTest {
     @Test
     void shouldDeleteUser() throws Exception {
         final String username = "username";
-        mockMvc.perform(delete("/user/{username}", username))
+        mockMvc.perform(delete("/user/{username}", username).with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -147,7 +147,7 @@ class UserControllerTest {
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
     void shouldNotDeleteCurrentUser() throws Exception{
-        mockMvc.perform(delete("/user/{username}", "admin"))
+        mockMvc.perform(delete("/user/{username}", "admin").with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value(ErrorCodes.CANNOT_DELETE_CURRENT_USER))
                 .andReturn();

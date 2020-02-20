@@ -7,12 +7,28 @@ const state = {
     userToken: null
 };
 
+const getCookie = function(name) {
+    if (!document.cookie) {
+        return null;
+    }
+
+    const xsrfCookies = document.cookie.split(';')
+        .map(c => c.trim())
+        .filter(c => c.startsWith(name + '='));
+
+    if (xsrfCookies.length === 0) {
+        return null;
+    }
+    return decodeURIComponent(xsrfCookies[0].split('=')[1]);
+};
+
 const getConfigWithAuthenticationHeaders = function (config, userToken) {
     if (!config)
         config = {};
     let headers = config.headers ? config.headers : {};
     if (userToken !== null)
         headers['Authorization'] = 'Basic ' + userToken;
+    headers['X-XSRF-TOKEN'] = getCookie('XSRF-TOKEN');
     config.headers = headers;
     return config;
 };
