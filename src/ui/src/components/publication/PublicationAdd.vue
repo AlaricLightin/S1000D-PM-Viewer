@@ -29,6 +29,7 @@
     // TODO написать ограничение по величине загружаемого файла
     import {mapGetters} from "vuex";
     import CustomDialog from "../customcomponents/CustomDialog";
+    import ErrorCodesStrings from "../../utils/ErrorCodes";
 
     export default {
         name: "PublicationAdd",
@@ -61,14 +62,11 @@
                     })
                     .catch((error) => {
                         this.loading = false;
-                        if(error.response && error.response.data) {
-                            // TODO Сделать более человекочитаемые результаты
-                            // TODO предусмотреть, что тут может быть не 400, а 500
-                            // TODO предусмотреть ошибку авторизации
-                            this.loadingErrorText = 'Код ошибки: ' + error.response.data.errorCode;
+                        if(error.response && error.response.data && error.response.data.errorCode) {
+                            this.loadingErrorText = ErrorCodesStrings[error.response.data.errorCode];
                         }
                         else {
-                            this.loadingErrorText = 'Нет связи с сервером';
+                            this.loadingErrorText = 'Не удалось загрузить публикацию.';
                         }
                         mainDialog.showAlert();
                     });
