@@ -12,16 +12,15 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.biderman.s1000dpmviewer.domain.UserData;
 import ru.biderman.s1000dpmviewer.domain.UserRole;
-import ru.biderman.s1000dpmviewer.exceptions.EmptyPasswordException;
-import ru.biderman.s1000dpmviewer.exceptions.InvalidUsernameException;
-import ru.biderman.s1000dpmviewer.exceptions.UserAlreadyExistsException;
 import ru.biderman.s1000dpmviewer.security.AuthorityUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @DisplayName("Сервис по работе с пользователями при интеграционном тесте ")
@@ -63,31 +62,10 @@ class UserServiceImplIntegrationTest {
         }
     }
 
-    @DisplayName("должен бросать исключение, если не удалось создать нового пользователя")
-    @ParameterizedTest
-    @MethodSource("dataForCreateErrorTest")
-    void shouldThrowExceptionIfCouldNotCreate(String username, String password, Set<UserRole> roles,
-                                              Class<Exception> exceptionClass) {
-        UserData userData = new UserData(username, password, roles);
-        assertThrows(exceptionClass, () -> userService.createUser(userData));
-    }
-
     private static Stream<Arguments> dataForCreateTest() {
         return Stream.of(
-                Arguments.of("username1", Collections.emptyList()),
-                Arguments.of("username2", Collections.singletonList(UserRole.EDITOR)),
-                Arguments.of("username3", Arrays.asList(UserRole.EDITOR, UserRole.ADMIN)),
-                Arguments.of("username4", null)
-        );
-    }
-
-    private static Stream<Arguments> dataForCreateErrorTest() {
-        return Stream.of(
-                Arguments.of("admin", PASSWORD, Collections.singleton(UserRole.ADMIN), UserAlreadyExistsException.class),
-                Arguments.of(null, PASSWORD, Collections.emptySet(), InvalidUsernameException.class),
-                Arguments.of("", PASSWORD, Collections.emptySet(), InvalidUsernameException.class),
-                Arguments.of("user1", null, Collections.emptySet(), EmptyPasswordException.class),
-                Arguments.of("user1", "", Collections.emptySet(), EmptyPasswordException.class)
+                Arguments.of("username1", Arrays.asList(UserRole.EDITOR, UserRole.ADMIN)),
+                Arguments.of("username2", null)
         );
     }
 }

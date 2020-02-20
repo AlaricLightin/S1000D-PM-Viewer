@@ -1,6 +1,7 @@
 package ru.biderman.s1000dpmviewer.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,18 +9,13 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.biderman.s1000dpmviewer.domain.UserData;
 import ru.biderman.s1000dpmviewer.domain.UserRole;
-import ru.biderman.s1000dpmviewer.exceptions.CustomBadRequestException;
-import ru.biderman.s1000dpmviewer.exceptions.EmptyPasswordException;
-import ru.biderman.s1000dpmviewer.exceptions.InvalidUsernameException;
-import ru.biderman.s1000dpmviewer.exceptions.UserAlreadyExistsException;
+import ru.biderman.s1000dpmviewer.exceptions.*;
 import ru.biderman.s1000dpmviewer.repositories.UserDao;
 import ru.biderman.s1000dpmviewer.security.AuthorityUtils;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,27 +41,17 @@ class UserServiceImpl implements UserService {
     @Transactional
     public void createUser(UserData userData) throws CustomBadRequestException {
         String username = userData.getUsername();
-        if (username == null || username.isEmpty())
+        if (!UserUtils.checkUsername(username))
             throw new InvalidUsernameException();
 
         String password = userData.getPassword();
-        if (password == null || password.isEmpty())
-            throw new EmptyPasswordException();
+        if (!UserUtils.checkPassword(password))
+            throw new InvalidPasswordException();
 
         if (jdbcUserDetailsManager.userExists(username))
             throw new UserAlreadyExistsException();
 
-        ArrayList<String> roleList;
-        if (userData.getAuthorities() != null)
-            roleList = userData.getAuthorities().stream()
-                    .map(UserRole::toString)
-                    .collect(Collectors.toCollection(ArrayList::new));
-        else
-            roleList = new ArrayList<>();
-
-        if(roleList.size() == 0)
-            roleList.add("USER");
-        String[] roles = roleList.toArray(new String[]{});
+        String[] roles = UserUtils.getRoleStringList(userData.getAuthorities());
 
         UserDetails newUser = User.builder()
                 .username(userData.getUsername())
@@ -80,5 +66,43 @@ class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(String username) {
         jdbcUserDetailsManager.deleteUser(username);
+    }
+
+    @Override
+    public void changeUserPassword(String username, String password) throws UserNotFoundException, InvalidPasswordException {
+        editUser(username, password, null);
+    }
+
+    @Override
+    public void changeUserRoles(String username, Set<UserRole> userRoleSet) throws UserNotFoundException, InvalidPasswordException {
+        editUser(username, null, userRoleSet);
+    }
+
+    private void editUser(String username, String password, Set<UserRole> userRoleSet)
+            throws UserNotFoundException, InvalidPasswordException {
+        UserDetails userDetails;
+        try {
+            userDetails = jdbcUserDetailsManager.loadUserByUsername(username);
+        }
+        catch (NotFoundException e) {
+            throw new UserNotFoundException();
+        }
+
+        User.UserBuilder newUserDetailsBuilder = User.withUserDetails(userDetails);
+
+        if (password != null) {
+            if(!UserUtils.checkPassword(password))
+                throw new InvalidPasswordException();
+
+            newUserDetailsBuilder
+                    .password(password)
+                    .passwordEncoder(passwordEncoder::encode);
+        }
+        else {
+            newUserDetailsBuilder
+                    .roles(UserUtils.getRoleStringList(userRoleSet));
+        }
+
+        jdbcUserDetailsManager.updateUser(newUserDetailsBuilder.build());
     }
 }

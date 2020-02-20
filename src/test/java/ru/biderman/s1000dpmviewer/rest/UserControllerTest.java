@@ -13,20 +13,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.biderman.s1000dpmviewer.domain.UserData;
 import ru.biderman.s1000dpmviewer.domain.UserRole;
-import ru.biderman.s1000dpmviewer.exceptions.CustomBadRequestException;
-import ru.biderman.s1000dpmviewer.exceptions.ErrorCodes;
-import ru.biderman.s1000dpmviewer.exceptions.InvalidUsernameException;
-import ru.biderman.s1000dpmviewer.exceptions.UserAlreadyExistsException;
+import ru.biderman.s1000dpmviewer.exceptions.*;
 import ru.biderman.s1000dpmviewer.services.UserService;
 import ru.biderman.s1000dpmviewer.testutils.WithMockAdmin;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,8 +48,12 @@ class UserControllerTest {
     @MockBean
     UserService userService;
 
+    private static final String USERNAME = "username";
+    private static final String PASSWORD = "password";
+    private static final Set<UserRole> TEST_USER_ROLES = Collections.singleton(UserRole.EDITOR);
+
     private static UserData createTestUserData() {
-        return new UserData("username", "password", Collections.singleton(UserRole.EDITOR));
+        return new UserData(USERNAME, PASSWORD, TEST_USER_ROLES);
     }
 
     private static byte[] createTestUserJsonBytes(UserData userData) throws Exception {
@@ -153,6 +156,66 @@ class UserControllerTest {
                 .andReturn();
     }
 
+    @DisplayName("должен менять пользователю пароль")
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void shouldChangePassword() throws Exception{
+        UserData userData = new UserData(USERNAME, PASSWORD, null);
+
+        mockMvc.perform(put("/user/{username}", USERNAME)
+                .content(createTestUserJsonBytes(userData))
+                .contentType(APPLICATION_JSON_VALUE)
+                .with(csrf())
+        )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userService).changeUserPassword(USERNAME, PASSWORD);
+    }
+
+    @DisplayName("должен менять пользователю роли")
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void shouldChangeRoles() throws Exception{
+        Set<UserRole> newRoles = Collections.singleton(UserRole.ADMIN);
+        UserData userData = new UserData(USERNAME, null, newRoles);
+
+        mockMvc.perform(put("/user/{username}", USERNAME)
+                .content(createTestUserJsonBytes(userData))
+                .contentType(APPLICATION_JSON_VALUE)
+                .with(csrf())
+        )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userService).changeUserRoles(USERNAME, newRoles);
+    }
+
+    @DisplayName("должен сообщать об ошибках, если редактирование приводит к ошибкам")
+    @ParameterizedTest
+    @MethodSource("dataForEditingError")
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void shouldThrowExceptionIfErrorWhenEditing(Class<Exception> exceptionClass,
+                                                ResultMatcher resultMatcher) throws Exception {
+        UserData userData = new UserData(USERNAME, PASSWORD, null);
+        doThrow(exceptionClass).when(userService).changeUserPassword(USERNAME, PASSWORD);
+
+        mockMvc.perform(put("/user/{username}", USERNAME)
+                .content(createTestUserJsonBytes(userData))
+                .contentType(APPLICATION_JSON_VALUE)
+                .with(csrf())
+        )
+                .andExpect(resultMatcher)
+                .andReturn();
+    }
+
+    private static Stream<Arguments> dataForEditingError() {
+        return Stream.of(
+                Arguments.of(UserNotFoundException.class, status().isNotFound()),
+                Arguments.of(InvalidPasswordException.class, status().isBadRequest())
+        );
+    }
+
     @DisplayName("должен не давать доступ к пользователям без админских прав")
     @ParameterizedTest
     @MethodSource("blockUserData")
@@ -167,10 +230,15 @@ class UserControllerTest {
         UserData userData = createTestUserData();
         return Stream.of(
                 Arguments.of(get("/user")),
-                Arguments.of(post("/user").content(createTestUserJsonBytes(userData))
+                Arguments.of(post("/user")
+                        .content(createTestUserJsonBytes(userData))
                         .contentType(APPLICATION_JSON_VALUE)
                         .with(csrf())),
-                Arguments.of(delete("/user/admin"))
+                Arguments.of(delete("/user/admin").with(csrf())),
+                Arguments.of(put("/user")
+                        .content(createTestUserJsonBytes(userData))
+                        .contentType(APPLICATION_JSON_VALUE)
+                        .with(csrf()))
         );
     }
 }

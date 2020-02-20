@@ -40,16 +40,15 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .hasRole(UserRole.ADMIN.toString())
                     .antMatchers("/actuator/logfile")
                     .hasRole(UserRole.ADMIN.toString())
-                .and()
-                .authorizeRequests()
+
                     .antMatchers(HttpMethod.POST, "/publication")
                     .hasRole(UserRole.EDITOR.toString())
-                .and()
-                .authorizeRequests()
+
                     .antMatchers(HttpMethod.GET,
                             "/",
-                            "/publication", "/publication/**",
-                            "/login")
+                            "/publication", "/publication/**")
+                    .permitAll()
+                    .antMatchers(HttpMethod.POST, "/login")
                     .permitAll()
                 .and()
                 .httpBasic()
