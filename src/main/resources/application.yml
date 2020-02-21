@@ -21,6 +21,7 @@ spring:
     multipart:
       enabled: true
       location: ${java.io.tmpdir}
+      max-file-size: 1MB
 
 management:
   endpoints:

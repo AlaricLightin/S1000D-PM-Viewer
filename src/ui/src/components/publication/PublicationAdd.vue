@@ -9,16 +9,19 @@
         <template v-slot:alertText>{{loadingErrorText}}</template>
 
         <template v-slot:mainComponents>
-            <v-file-input ref="file-input"
-                          v-model="file"
-                          label="Выберите XML-файл с публикацией в формате S1000D 4.1"
-                          accept=".xml"
-                          show-size
-            />
+            <v-form ref="form" v-model="valid">
+                <v-file-input ref="file-input"
+                              v-model="file"
+                              label="Выберите XML-файл с публикацией в формате S1000D 4.1"
+                              accept=".xml"
+                              :rules="fileRules"
+                              show-size
+                />
+            </v-form>
         </template>
 
         <template v-slot:mainButton>
-            <v-btn v-bind:disabled="needDisableSubmitButton"
+            <v-btn v-bind:disabled="loading"
                    v-bind:loading="loading"
                    @click="submitFile">Загрузить</v-btn>
         </template>
@@ -26,7 +29,6 @@
 </template>
 
 <script>
-    // TODO написать ограничение по величине загружаемого файла
     import {mapGetters} from "vuex";
     import CustomDialog from "../customcomponents/CustomDialog";
     import ErrorCodesStrings from "../../utils/ErrorCodes";
@@ -36,16 +38,17 @@
         components: {CustomDialog},
 
         data: () => ({
+            valid: false,
             file: null,
             loading: false,
             loadingErrorText: null,
+            fileRules: [
+                v => v || 'Не выбран файл для загрузки.',
+                v => v && v.size < 1048576 || 'Файл с публикацией не должен превышать 1 Мб.'
+            ]
         }),
 
         computed: {
-            needDisableSubmitButton: function () {
-                return !this.file || this.loading;
-            },
-
             ...mapGetters('authentication', [
                 'isEditor'
             ]),
@@ -53,6 +56,9 @@
 
         methods: {
             submitFile() {
+                if (!this.$refs["form"].validate())
+                    return;
+
                 this.loading = true;
                 this.loadingErrorText = null;
                 let mainDialog = this.$refs['main-dialog'];
@@ -73,7 +79,8 @@
             },
 
             setStartState() {
-                this.file = null;
+                if(this.$refs["form"])
+                    this.$refs["form"].reset();
             },
         },
     }
