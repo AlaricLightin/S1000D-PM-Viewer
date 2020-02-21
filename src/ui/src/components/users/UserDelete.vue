@@ -1,5 +1,5 @@
 <template>
-    <custom-dialog v-if="isVisible"
+    <custom-dialog v-if="!isCurrentUser(user.username)"
                    ref="main-dialog"
                    max-width="400px"
                    main-button-caption="Удалить"
@@ -7,13 +7,13 @@
                    v-on:ok-button-click="deleteUser"
     >
         <template v-slot:alertText>Не удалось удалить пользователя.</template>
-        <template v-slot:mainComponents><p>Вы действительно хотите удалить пользователя?</p></template>
+        <template v-slot:mainComponents><p>Вы действительно хотите удалить пользователя {{user.username}}?</p></template>
     </custom-dialog>
 </template>
 
 <script>
     import CustomDialog from "../customcomponents/CustomDialog";
-    import {mapState} from "vuex";
+    import {mapGetters} from "vuex";
 
     export default {
         name: "UserDelete",
@@ -24,13 +24,9 @@
         },
 
         computed: {
-            ...mapState({
-                currentUser: state => state.authentication.user
-            }),
-
-            isVisible: function () {
-                return this.user.username !== this.currentUser.username;
-            }
+            ...mapGetters('authentication', [
+                'isCurrentUser'
+            ])
         },
 
         methods: {

@@ -61,7 +61,6 @@
                         mainDialog.closeDialog();
                     })
                     .catch((error) => {
-                        this.loading = false;
                         if(error.response && error.response.data && error.response.data.errorCode) {
                             this.loadingErrorText = ErrorCodesStrings[error.response.data.errorCode];
                         }
@@ -69,11 +68,11 @@
                             this.loadingErrorText = 'Не удалось загрузить публикацию.';
                         }
                         mainDialog.showAlert();
-                    });
+                    })
+                    .finally(() => this.loading = false);
             },
 
             setStartState() {
-                this.loading = false;
                 this.file = null;
             },
         },

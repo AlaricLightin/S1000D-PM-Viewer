@@ -11,6 +11,12 @@
                 </v-list-item-content>
 
                 <v-list-item-action>
+                    <user-change-roles :user="user"/>
+                </v-list-item-action>
+                <v-list-item-action>
+                    <user-change-password :user="user"/>
+                </v-list-item-action>
+                <v-list-item-action>
                     <user-delete :user="user"/>
                 </v-list-item-action>
             </v-list-item>
@@ -25,10 +31,12 @@
     import {mapState} from "vuex";
     import UserAdd from "./UserAdd";
     import UserDelete from "./UserDelete";
+    import UserChangePassword from "./UserChangePassword";
+    import UserChangeRoles from "./UserChangeRoles";
 
     export default {
         name: "UserList",
-        components: {UserDelete, UserAdd, LoadingErrorAlert},
+        components: {UserChangeRoles, UserChangePassword, UserDelete, UserAdd, LoadingErrorAlert},
 
         computed: {
             ...mapState({

@@ -81,6 +81,10 @@ const getters = {
 
     isEditor: (state) => {
         return hasUserRole(state.user, 'EDITOR');
+    },
+
+    isCurrentUser: (state) => (username) => {
+        return username === state.user.username;
     }
 };
 
