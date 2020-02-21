@@ -16,7 +16,6 @@ insert into users(username, password, enabled) values ('admin', '$2y$12$mTQ8Y/mn
 insert into authorities(username, authority) values ('admin', 'ROLE_ADMIN');
 insert into authorities(username, authority) values ('admin', 'ROLE_EDITOR');
 
--- TODO удалить или модицифировать
 insert into users(username, password, enabled) values ('editor', '$2y$12$mTQ8Y/mnlItOsMUEH/EVJOuUF558ChpzWSLJ9HuB0cM.5eboqvftO', true);
 insert into authorities(username, authority) values ('editor', 'ROLE_EDITOR');
 

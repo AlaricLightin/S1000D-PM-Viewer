@@ -17,8 +17,7 @@ import java.time.ZonedDateTime;
 
 @Service
 public class PublicationParser4_1 implements PublicationParser{
-    @Override
-    public PublicationDetails getPublicationDetails(Document document) throws InvalidPublicationException {
+    PublicationDetails getPublicationDetails(Document document) throws InvalidPublicationException {
         PublicationDetails result = new PublicationDetails();
 
         Element pmAddress = XMLParseUtils.getElement(document, "//identAndStatusSection/pmAddress")

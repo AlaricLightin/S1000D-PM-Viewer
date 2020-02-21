@@ -7,7 +7,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.w3c.dom.Document;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.DMRef;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
-import ru.biderman.s1000dpmviewer.utils.XMLDocumentUtils;
+import ru.biderman.s1000dpmviewer.testutils.TestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.biderman.s1000dpmviewer.testutils.TestConsts.*;
@@ -24,7 +24,7 @@ class PublicationContentParser4_1Test {
     @DisplayName("должен его создавать")
     @Test
     void shouldCreateContent() {
-        Document document = XMLDocumentUtils.getDocumentFromFile(getDataFile(TEST_PUBLICATION_FILENAME));
+        Document document = TestUtils.getDocumentFromFile(getDataFile(TEST_PUBLICATION_FILENAME));
         assertThat(document).isNotNull();
 
         assertThat(PublicationContentParser4_1.createRootEntry(document))

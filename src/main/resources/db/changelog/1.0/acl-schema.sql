@@ -10,7 +10,7 @@ INSERT INTO acl_sid (id, principal, sid) VALUES
 (2, false, 'ROLE_EDITOR'),
 (3, false, 'ROLE_USER'),
 (4, false, 'ROLE_ANONYMOUS'),
---- TODO убрать или отредактировать набор стартовых пользователей
+
 (5, true, 'admin'),
 (6, true, 'editor'),
 (7, true, 'user');

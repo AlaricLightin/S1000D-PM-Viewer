@@ -35,19 +35,12 @@
 </template>
 
 <script>
-  // TODO настроить, чтобы нельзя было перейти к списку users вручную
-  // https://router.vuejs.org/guide/advanced/navigation-guards.html
-
   import Login from "./components/login/Login";
   import {mapGetters} from "vuex";
 
   export default {
     name: 'App',
     components: {login: Login},
-    data: () => ({
-      //
-    }),
-
     computed: {
       ...mapGetters('authentication', [
         'isAdmin'

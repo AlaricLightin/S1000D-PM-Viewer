@@ -12,7 +12,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 
 public class XMLDocumentUtils {
@@ -22,21 +25,6 @@ public class XMLDocumentUtils {
             return builder.parse(inputStream);
         }
         catch (ParserConfigurationException | SAXException | IOException e) {
-            // TODO определиться с логированием и обработкой исключений
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static Document getDocumentFromFile(File file) {
-        try(
-                FileInputStream fis = new FileInputStream(file)
-        )
-        {
-            return getDocumentFromStream(fis);
-        }
-        catch (IOException e) {
-            // TODO определиться с логированием и обработкой исключений
             e.printStackTrace();
             return null;
         }
@@ -59,7 +47,6 @@ public class XMLDocumentUtils {
             transformer.transform(source, result);
             return result.getWriter().toString();
         } catch(TransformerException e) {
-            // TODO определиться с логированием и обработкой исключений
             e.printStackTrace();
             return null;
         }

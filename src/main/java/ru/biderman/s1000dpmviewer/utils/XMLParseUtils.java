@@ -47,7 +47,6 @@ public class XMLParseUtils {
             return node instanceof Element ? Optional.of((Element) node) : Optional.empty();
         }
         catch (XPathExpressionException e) {
-            // TODO определиться с логированием и обработкой исключений
             e.printStackTrace();
             return Optional.empty();
         }

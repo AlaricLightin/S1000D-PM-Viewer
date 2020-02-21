@@ -12,7 +12,6 @@ import ru.biderman.s1000dpmviewer.domain.Publication;
 import ru.biderman.s1000dpmviewer.domain.publicationcontent.Entry;
 import ru.biderman.s1000dpmviewer.exceptions.InvalidPublicationException;
 import ru.biderman.s1000dpmviewer.testutils.TestUtils;
-import ru.biderman.s1000dpmviewer.utils.XMLDocumentUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -44,7 +43,7 @@ class PublicationParser4_1Test {
     @DisplayName("должен получать детали публикации")
     @Test
     void shouldGetPublicationDetails() throws Exception{
-        Document document = XMLDocumentUtils.getDocumentFromFile(getDataFile(TEST_PUBLICATION_FILENAME));
+        Document document = TestUtils.getDocumentFromFile(getDataFile(TEST_PUBLICATION_FILENAME));
         assertThat(document).isNotNull();
 
         assertThat(parser.getPublicationDetails(document))
@@ -95,7 +94,7 @@ class PublicationParser4_1Test {
     @DisplayName("должен получать контент публикации")
     @Test
     void shouldGetContent() {
-        Document document = XMLDocumentUtils.getDocumentFromFile(getDataFile(TEST_PUBLICATION_FILENAME));
+        Document document = TestUtils.getDocumentFromFile(getDataFile(TEST_PUBLICATION_FILENAME));
         assertThat(document).isNotNull();
 
         assertThat(parser.getPublicationContent(document))

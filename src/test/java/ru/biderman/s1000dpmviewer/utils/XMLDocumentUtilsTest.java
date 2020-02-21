@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.w3c.dom.Document;
+import ru.biderman.s1000dpmviewer.testutils.TestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.biderman.s1000dpmviewer.testutils.TestUtils.getDataFile;
@@ -15,7 +16,7 @@ class XMLDocumentUtilsTest {
     @DisplayName("должны считывать XML из файла")
     @Test
     void shouldReadXMLFromFile()  {
-        Document document = XMLDocumentUtils.getDocumentFromFile(getDataFile("pub1.xml"));
+        Document document = TestUtils.getDocumentFromFile(getDataFile("pub1.xml"));
         assertThat(document)
                 .isNotNull()
                 .extracting(d -> d.getDocumentElement().getTagName())

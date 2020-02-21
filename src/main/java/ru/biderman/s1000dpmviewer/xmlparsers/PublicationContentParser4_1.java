@@ -33,7 +33,6 @@ class PublicationContentParser4_1 {
         HashMap<String, Function<Element, EntryElement>> functionMap = new HashMap<>();
         functionMap.put("pmEntry", PublicationContentParser4_1::createPMEntry);
         functionMap.put("dmRef", PublicationContentParser4_1::createDmRef);
-        // TODO добавить pmRef?
         List<EntryElement> list = XMLParseUtils.getChildList(element, functionMap);
 
         return new Entry(title, list);
