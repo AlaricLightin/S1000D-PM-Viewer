@@ -1,0 +1,10 @@
+spring:
+  liquibase:
+    drop-first: true
+    change-log: classpath:db/changelog/db.changelog-test.yaml
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
